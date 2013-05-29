@@ -3,6 +3,8 @@ ch341eeprom
 
 A libusb based programming tool for 24Cxx serial EEPROMs using the WinChipHead CH341A IC
 
+![WinChipHead CH341A based programmer](https://raw.github.com/commandtab/ch341eeprom/master/pics/programmer.jpg)
+
 **Requirements**
 
 * llvm and make (via Xcode or Xcode Command Line Tools)
