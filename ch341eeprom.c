@@ -19,7 +19,7 @@
 //   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libusb-1.0/libusb.h> 
-#include <asm/errno.h>
+#include <sys/errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
 
     static char version_msg[] =    
         "ch341eeprom - an i2c EEPROM programming tool for the WCH CH341a IC\n" \
-        "Version " CH341TOOLVERSION  " copyright (c) 2011  asbokid <ballymunboy@gmail.com>\n\n" \
-        "This program comes with asbolutely no warranty; This is free software,\n" \
+        "Version " CH341TOOLVERSION  " copyright (c) 2011 asbokid <ballymunboy@gmail.com>\n\n" \
+        "This program comes with absolutely no warranty; This is free software,\n" \
         "and you are welcome to redistribute it under certain conditions:\n" \
         "GNU GPL v3 License: http://www.gnu.org/licenses/gpl.html\n";
 
@@ -50,11 +50,11 @@ int main(int argc, char **argv) {
         " -h, --help             display this text\n" \
         " -v, --verbose          verbose output\n" \
         " -d, --debug            debug output\n" \
-        " -s, --size             size of EEPROM {24c32|24c64}\n" \
+        " -s, --size             size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}\n" \
         " -e, --erase            erase EEPROM (fill with 0xff)\n" \
         " -w, --write <filename> write EEPROM with image from filename\n" \
         " -r, --read  <filename> read EEPROM and save image to filename\n\n" \
-        "Example:  ch341eeprom -v -s 24c64 -w bootrom.bin\n";
+        "Example: ch341eeprom -v -s 24c64 -w bootrom.bin\n";
 
     static struct option longopts[] = {
         {"help",    no_argument,       0, 'h'},
