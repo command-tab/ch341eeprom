@@ -1,0 +1,87 @@
+; USBIOX.INF
+; Driver for USB=>EPP/I2C/SPI... chip V2.1
+; WDM/DLL for Windows 98/Me/2000/XP
+; Copyright (C) W.ch 2001-2008
+;
+
+[Version]
+Signature = "$Chicago$"
+Class     = WCH
+ClassGuid = {77989ADF-06DB-4025-92E8-40D902C03B0A}
+Provider  = %WinChipHead%
+DriverVer = 10/15/2008, 2.1.2008.10
+
+[ControlFlags]
+ExcludeFromSelect = USB\VID_1A86&PID_5512
+ExcludeFromSelect = USB\VID_4348&PID_5512
+;ExcludeFromSelect = USB\VID_1A86&PID_7523
+;ExcludeFromSelect = USB\VID_1A86&PID_5523
+;ExcludeFromSelect = USB\VID_4348&PID_5523
+
+[ClassInstall32]
+Addreg = WCHReg
+
+[ClassInstall]
+Addreg = WCHReg
+
+[WCHReg]
+HKR, , , 0, %ClassName%
+HKR, , Icon, , -5
+HKR, , NoInstallClass, , 1
+
+[Manufacturer]
+%WinChipHead% = WinChipHead
+
+[WinChipHead]
+%USBIOX.DeviceDesc% = USBIOX.Install, USB\VID_1A86&PID_5512
+%USBIOX.DeviceDesc% = USBIOX.Install, USB\VID_4348&PID_5512
+;%USBIOX.DeviceDesc% = USBIOX.Install, USB\VID_1A86&PID_7523
+;%USBIOX.DeviceDesc% = USBIOX.Install, USB\VID_1A86&PID_5523
+;%USBIOX.DeviceDesc% = USBIOX.Install, USB\VID_4348&PID_5523
+
+[USBIOX.Install]
+CopyFiles = USBIOX.CopyFiles.SYS, USBIOX.CopyFiles.DLL
+AddReg    = USBIOX.9X.AddReg
+
+[USBIOX.Install.NT]
+CopyFiles = USBIOX.CopyFiles.SYS, USBIOX.CopyFiles.DLL
+AddReg    = USBIOX.NT.AddReg
+
+[USBIOX.CopyFiles.SYS]
+USBIOX.SYS, , , 2
+
+[USBIOX.CopyFiles.DLL]
+USBIOX.DLL, , , 2
+
+[USBIOX.9X.AddReg]
+HKR, , DevLoader, , *NTKERN
+HKR, , NTMPDriver, , USBIOX.SYS
+
+[USBIOX.NT.AddReg]
+
+[USBIOX.Install.NT.Services]
+AddService = USBIOX, 2, USBIOX.Service
+
+[USBIOX.Service]
+DisplayName   = "USBIOX"
+ServiceType   = 1
+StartType     = 3
+ErrorControl  = 1
+ServiceBinary = %10%\System32\Drivers\USBIOX.SYS
+
+[DestinationDirs]
+DefaultDestDir      = 10, System32\Drivers
+USBIOX.CopyFiles.SYS = 10, System32\Drivers
+USBIOX.CopyFiles.DLL = 11
+
+[SourceDisksFiles]
+USBIOX.SYS  = 1
+USBIOX.DLL  = 1
+
+[SourceDisksNames]
+1 = "USB Parallel Installation Disk", USBIOX.SYS, ,
+
+[Strings]
+ClassName        = "USB-IO"
+WinChipHead      = "WCH"
+USBIOX.DeviceDesc = "USB-IO"
