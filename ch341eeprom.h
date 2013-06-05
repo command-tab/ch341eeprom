@@ -126,11 +126,11 @@ struct EEPROM {
 };
 
 const static struct EEPROM eepromlist[] = {
-  { "24c01", 128 }, // 1kbit = 128 bits
-  { "24c02", 256 },
-  { "24c04", 512 },
-  { "24c08", 1024 },
-  { "24c16", 2048 },
+  { "24c01", 128 }, // 16 pages of 8 bytes each = 128 bytes
+  { "24c02", 256 }, // 32 pages of 8 bytes each = 256 bytes
+  { "24c04", 512 }, // 32 pages of 16 bytes each = 512 bytes
+  { "24c08", 1024 }, // 64 pages of 16 bytes each = 1024 bytes
+  { "24c16", 2048 }, // 128 pages of 16 bytes each = 2048 bytes
   { "24c32", 4096 }, // 32kbit = 4kbyte
   { "24c64", 8192 },
   { "24c128", 16384 },
