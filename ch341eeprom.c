@@ -136,10 +136,10 @@ int main(int argc, char **argv) {
     }
 
     if(!(devHandle = ch341configure(USB_LOCK_VENDOR, USB_LOCK_PRODUCT))) {
-        fprintf(stderr, "Couldnt configure USB device\n", USB_LOCK_VENDOR, USB_LOCK_PRODUCT);
+        fprintf(stderr, "Couldnt configure USB device with vendor ID: %04x product ID: %04x\n", USB_LOCK_VENDOR, USB_LOCK_PRODUCT);
         goto shutdown;
     }
-    fprintf(verbout, "Configured USB device\n", USB_LOCK_VENDOR, USB_LOCK_PRODUCT);
+    fprintf(verbout, "Configured USB device with vendor ID: %04x product ID: %04x\n", USB_LOCK_VENDOR, USB_LOCK_PRODUCT);
 
     if(ch341setstream(devHandle, CH341_I2C_STANDARD_SPEED) < 0) {
         fprintf(stderr, "Couldnt set i2c bus speed\n");
