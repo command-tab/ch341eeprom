@@ -4,8 +4,8 @@
 
 #define CH341TOOLVERSION            "0.5"
 
-#define USB_LOCK_VENDOR 0x1a86              // Dev : (1a86) QinHeng Electronics
-#define USB_LOCK_PRODUCT 0x5512             //       (5512) CH341A in i2c mode
+#define USB_LOCK_VENDOR             0x1a86 // Dev : (1a86) QinHeng Electronics
+#define USB_LOCK_PRODUCT            0x5512 //       (5512) CH341A in i2c mode
 
 
 #define MAX_EEPROM_SIZE             16384
@@ -15,10 +15,10 @@
 #define DEFAULT_INTERFACE           0x00
 
 #define DEFAULT_CONFIGURATION       0x01
-#define DEFAULT_TIMEOUT             300     // 300mS for USB timeouts
+#define DEFAULT_TIMEOUT             300    // 300mS for USB timeouts
 
 #define IN_BUF_SZ                   0x100
-#define EEPROM_WRITE_BUF_SZ         0x2b    // only for 24c64 / 24c32 ??
+#define EEPROM_WRITE_BUF_SZ         0x2b   // only for 24c64 / 24c32 ??
 #define EEPROM_READ_BULKIN_BUF_SZ   0x20
 #define EEPROM_READ_BULKOUT_BUF_SZ  0x65
 
