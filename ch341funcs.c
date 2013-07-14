@@ -45,13 +45,11 @@ struct libusb_device_handle *ch341configure(uint16_t vid, uint16_t pid) {
 
     struct libusb_device *dev;
     struct libusb_device_handle *devHandle;
-    int32_t ret=0, ret2 = 0;                    // set to < 0 to indicate USB errors
-    uint32_t i = 0, j = 0;
+    int32_t ret=0;                    // set to < 0 to indicate USB errors
+    uint32_t i = 0;
     int32_t currentConfig = 0;
 
-    uint8_t  ch341DescriptorBuffer[0x12];
-    uint8_t  ch341InBuffer[IN_BUF_SZ];          // 0x100 bytes in size
-    uint8_t  ch341OutBuffer[EEPROM_READ_BULKOUT_BUF_SZ];
+    uint8_t ch341DescriptorBuffer[0x12];
 
     ret = libusb_init(NULL);
     if(ret < 0) {
