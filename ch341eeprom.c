@@ -32,7 +32,7 @@ FILE *debugout, *verbout;
 uint8_t *readbuf = NULL;
 
 int main(int argc, char **argv) {
-    int i, ret = 0, eepromsize = 0, bytesread = 0;
+    int i, eepromsize = 0, bytesread = 0;
     uint8_t debug = FALSE, verbose = FALSE;
     struct libusb_device_handle *devHandle = NULL;
     char *filename = NULL, eepromname[12], operation = 0;
