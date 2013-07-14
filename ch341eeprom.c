@@ -26,6 +26,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <getopt.h>
+#include <limits.h>
 #include "ch341eeprom.h"
 
 FILE *debugout, *verbout;
