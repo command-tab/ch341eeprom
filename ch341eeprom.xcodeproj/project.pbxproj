@@ -245,6 +245,8 @@
 					"/usr/include/**",
 					"/usr/local/include/**",
 				);
+				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				OTHER_LDFLAGS = "-lusb-1.0";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -257,6 +259,8 @@
 					"/usr/include/**",
 					"/usr/local/include/**",
 				);
+				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				OTHER_LDFLAGS = "-lusb-1.0";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
