@@ -163,7 +163,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
 
     uint8_t ch341outBuffer[EEPROM_READ_BULKOUT_BUF_SZ];
     uint8_t ch341inBuffer[IN_BUF_SZ];               // 0x100 bytes
-    int32_t ret = 0, readpktcount;
+    int32_t ret = 0, readpktcount = 0;
     struct libusb_transfer *xferBulkIn, *xferBulkOut;
     struct timeval tv = {0, 100};                   // our async polling interval
 
@@ -197,27 +197,33 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
 
     byteoffset = 0;
 
-    while (byteoffset < bytestoread) {
+    while (1) {
         fprintf(stdout, "Read [%d] of [%d] bytes      \r", byteoffset, bytestoread);
 		ret = libusb_handle_events_timeout(NULL, &tv);
 
 		if (ret < 0 || getnextpkt == -1) {          // indicates an error
             fprintf(stderr, "ret from libusb_handle_timeout = %d\n", ret);
             fprintf(stderr, "getnextpkt = %d\n", getnextpkt);
-            fprintf(stderr, "USB read error : %s\n", strerror(-ret));
-			goto out_deinit;
+            if (ret < 0)
+                fprintf(stderr, "USB read error : %s\n", strerror(-ret));
+            libusb_free_transfer(xferBulkIn);
+            libusb_free_transfer(xferBulkOut);
+            return -1;
         }
         if(getnextpkt == 1) {                       // callback function reports a new BULK IN packet received
             getnextpkt = 0;                         //   reset the flag
             readpktcount++;                         //   increment the read packet counter
             byteoffset += EEPROM_READ_BULKIN_BUF_SZ;
+            if (byteoffset == bytestoread)
+                break;
+
             fprintf(debugout, "\nRe-submitting transfer request to BULK IN endpoint\n");
             libusb_submit_transfer(xferBulkIn);     // re-submit request for next BULK IN packet of EEPROM data
             if(syncackpkt)
                 syncackpkt = 0;
                                                     // if 4th packet received, we are at end of 0x80 byte data block,
                                                     // if it is not the last block, then resubmit request for data
-            if(readpktcount==4 && byteoffset < bytestoread) {
+            if(readpktcount==4) {
                 fprintf(debugout, "\nSubmitting next transfer request to BULK OUT endpoint\n");
                 readpktcount = 0;
 
