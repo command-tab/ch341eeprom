@@ -197,7 +197,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
 
     byteoffset = 0;
 
-    while (byteoffset < bytestoread) {
+    while (1) {
         fprintf(stdout, "Read [%d] of [%d] bytes      \r", byteoffset, bytestoread);
 		ret = libusb_handle_events_timeout(NULL, &tv);
 
@@ -214,13 +214,16 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
             getnextpkt = 0;                         //   reset the flag
             readpktcount++;                         //   increment the read packet counter
             byteoffset += EEPROM_READ_BULKIN_BUF_SZ;
+            if (byteoffset == bytestoread)
+                break;
+
             fprintf(debugout, "\nRe-submitting transfer request to BULK IN endpoint\n");
             libusb_submit_transfer(xferBulkIn);     // re-submit request for next BULK IN packet of EEPROM data
             if(syncackpkt)
                 syncackpkt = 0;
                                                     // if 4th packet received, we are at end of 0x80 byte data block,
                                                     // if it is not the last block, then resubmit request for data
-            if(readpktcount==4 && byteoffset < bytestoread) {
+            if(readpktcount==4) {
                 fprintf(debugout, "\nSubmitting next transfer request to BULK OUT endpoint\n");
                 readpktcount = 0;
 
