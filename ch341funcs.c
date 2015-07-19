@@ -163,7 +163,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
 
     uint8_t ch341outBuffer[EEPROM_READ_BULKOUT_BUF_SZ];
     uint8_t ch341inBuffer[IN_BUF_SZ];               // 0x100 bytes
-    int32_t ret = 0, readpktcount;
+    int32_t ret = 0, readpktcount = 0;
     struct libusb_transfer *xferBulkIn, *xferBulkOut;
     struct timeval tv = {0, 100};                   // our async polling interval
 
