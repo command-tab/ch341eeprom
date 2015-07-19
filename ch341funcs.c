@@ -204,8 +204,11 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
 		if (ret < 0 || getnextpkt == -1) {          // indicates an error
             fprintf(stderr, "ret from libusb_handle_timeout = %d\n", ret);
             fprintf(stderr, "getnextpkt = %d\n", getnextpkt);
-            fprintf(stderr, "USB read error : %s\n", strerror(-ret));
-			goto out_deinit;
+            if (ret < 0)
+                fprintf(stderr, "USB read error : %s\n", strerror(-ret));
+            libusb_free_transfer(xferBulkIn);
+            libusb_free_transfer(xferBulkOut);
+            return -1;
         }
         if(getnextpkt == 1) {                       // callback function reports a new BULK IN packet received
             getnextpkt = 0;                         //   reset the flag
