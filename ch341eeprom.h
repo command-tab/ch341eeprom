@@ -8,7 +8,7 @@
 #define USB_LOCK_PRODUCT            0x5512 //       (5512) CH341A in i2c mode
 
 
-#define MAX_EEPROM_SIZE             16384
+#define MAX_EEPROM_SIZE             131072 /* For 24c1024*/
 
 #define BULK_WRITE_ENDPOINT         0x02
 #define BULK_READ_ENDPOINT          0x82
@@ -25,67 +25,67 @@
 // Based on (closed-source) DLL V1.9 for USB by WinChipHead (c) 2005.
 // Supports USB chips: CH341, CH341A
 
-#define		mCH341_PACKET_LENGTH	32
-#define		mCH341_PKT_LEN_SHORT	8
+#define	mCH341_PACKET_LENGTH		32
+#define	mCH341_PKT_LEN_SHORT		8
 
-#define		mCH341_ENDP_INTER_UP	0x81
-#define		mCH341_ENDP_INTER_DOWN	0x01
-#define		mCH341_ENDP_DATA_UP		0x82
-#define		mCH341_ENDP_DATA_DOWN	0x02
+#define	mCH341_ENDP_INTER_UP		0x81
+#define	mCH341_ENDP_INTER_DOWN		0x01
+#define	mCH341_ENDP_DATA_UP		0x82
+#define	mCH341_ENDP_DATA_DOWN		0x02
 
-#define		mCH341_VENDOR_READ		0xC0
-#define		mCH341_VENDOR_WRITE		0x40
+#define	mCH341_VENDOR_READ		0xC0
+#define	mCH341_VENDOR_WRITE		0x40
 
-#define		mCH341_PARA_INIT		0xB1
-#define		mCH341_I2C_STATUS		0x52
-#define		mCH341_I2C_COMMAND		0x53
+#define	mCH341_PARA_INIT		0xB1
+#define	mCH341_I2C_STATUS		0x52
+#define	mCH341_I2C_COMMAND		0x53
 
-#define		mCH341_PARA_CMD_R0		0xAC
-#define		mCH341_PARA_CMD_R1		0xAD
-#define		mCH341_PARA_CMD_W0		0xA6
-#define		mCH341_PARA_CMD_W1		0xA7
-#define		mCH341_PARA_CMD_STS		0xA0
+#define	mCH341_PARA_CMD_R0		0xAC
+#define	mCH341_PARA_CMD_R1		0xAD
+#define	mCH341_PARA_CMD_W0		0xA6
+#define	mCH341_PARA_CMD_W1		0xA7
+#define	mCH341_PARA_CMD_STS		0xA0
 
-#define		mCH341A_CMD_SET_OUTPUT	0xA1
-#define		mCH341A_CMD_IO_ADDR		0xA2
-#define		mCH341A_CMD_PRINT_OUT	0xA3
-#define		mCH341A_CMD_SPI_STREAM	0xA8
-#define		mCH341A_CMD_SIO_STREAM	0xA9
-#define		mCH341A_CMD_I2C_STREAM	0xAA
-#define		mCH341A_CMD_UIO_STREAM	0xAB
+#define	mCH341A_CMD_SET_OUTPUT		0xA1
+#define	mCH341A_CMD_IO_ADDR		0xA2
+#define	mCH341A_CMD_PRINT_OUT		0xA3
+#define	mCH341A_CMD_SPI_STREAM		0xA8
+#define	mCH341A_CMD_SIO_STREAM		0xA9
+#define	mCH341A_CMD_I2C_STREAM		0xAA
+#define	mCH341A_CMD_UIO_STREAM		0xAB
 
-#define		mCH341A_BUF_CLEAR		0xB2
-#define		mCH341A_I2C_CMD_X		0x54
-#define		mCH341A_DELAY_MS		0x5E
-#define		mCH341A_GET_VER			0x5F
+#define	mCH341A_BUF_CLEAR		0xB2
+#define	mCH341A_I2C_CMD_X		0x54
+#define	mCH341A_DELAY_MS		0x5E
+#define	mCH341A_GET_VER			0x5F
 
-#define		mCH341_EPP_IO_MAX		( mCH341_PACKET_LENGTH - 1 )
-#define		mCH341A_EPP_IO_MAX		0xFF
+#define	mCH341_EPP_IO_MAX		( mCH341_PACKET_LENGTH - 1 )
+#define	mCH341A_EPP_IO_MAX		0xFF
 
-#define		mCH341A_CMD_IO_ADDR_W	0x00
-#define		mCH341A_CMD_IO_ADDR_R	0x80
+#define	mCH341A_CMD_IO_ADDR_W		0x00
+#define	mCH341A_CMD_IO_ADDR_R		0x80
 
-#define		mCH341A_CMD_I2C_STM_STA	0x74
-#define		mCH341A_CMD_I2C_STM_STO	0x75
-#define		mCH341A_CMD_I2C_STM_OUT	0x80
-#define		mCH341A_CMD_I2C_STM_IN	0xC0
-#define		mCH341A_CMD_I2C_STM_MAX	( min( 0x3F, mCH341_PACKET_LENGTH ) )
-#define		mCH341A_CMD_I2C_STM_SET	0x60
-#define		mCH341A_CMD_I2C_STM_US	0x40
-#define		mCH341A_CMD_I2C_STM_MS	0x50
-#define		mCH341A_CMD_I2C_STM_DLY	0x0F
-#define		mCH341A_CMD_I2C_STM_END	0x00
+#define	mCH341A_CMD_I2C_STM_STA		0x74
+#define	mCH341A_CMD_I2C_STM_STO		0x75
+#define	mCH341A_CMD_I2C_STM_OUT		0x80
+#define	mCH341A_CMD_I2C_STM_IN		0xC0
+#define	mCH341A_CMD_I2C_STM_MAX		( min( 0x3F, mCH341_PACKET_LENGTH ) )
+#define	mCH341A_CMD_I2C_STM_SET		0x60
+#define	mCH341A_CMD_I2C_STM_US		0x40
+#define	mCH341A_CMD_I2C_STM_MS		0x50
+#define	mCH341A_CMD_I2C_STM_DLY		0x0F
+#define	mCH341A_CMD_I2C_STM_END		0x00
 
-#define		mCH341A_CMD_UIO_STM_IN	0x00
-#define		mCH341A_CMD_UIO_STM_DIR	0x40
-#define		mCH341A_CMD_UIO_STM_OUT	0x80
-#define		mCH341A_CMD_UIO_STM_US	0xC0
-#define		mCH341A_CMD_UIO_STM_END	0x20
+#define	mCH341A_CMD_UIO_STM_IN		0x00
+#define	mCH341A_CMD_UIO_STM_DIR		0x40
+#define	mCH341A_CMD_UIO_STM_OUT		0x80
+#define	mCH341A_CMD_UIO_STM_US		0xC0
+#define	mCH341A_CMD_UIO_STM_END		0x20
 
-#define		mCH341_PARA_MODE_EPP	0x00
-#define		mCH341_PARA_MODE_EPP17	0x00
-#define		mCH341_PARA_MODE_EPP19	0x01
-#define		mCH341_PARA_MODE_MEM	0x02
+#define	mCH341_PARA_MODE_EPP		0x00
+#define	mCH341_PARA_MODE_EPP17		0x00
+#define	mCH341_PARA_MODE_EPP19		0x01
+#define	mCH341_PARA_MODE_MEM		0x02
 
 
 #define CH341_I2C_LOW_SPEED 0               // low speed - 20kHz               
@@ -126,16 +126,16 @@ struct EEPROM {
 };
 
 const static struct EEPROM eepromlist[] = {
-  { "24c01", 128 }, // 16 pages of 8 bytes each = 128 bytes
-  { "24c02", 256 }, // 32 pages of 8 bytes each = 256 bytes
-  { "24c04", 512 }, // 32 pages of 16 bytes each = 512 bytes
-  { "24c08", 1024 }, // 64 pages of 16 bytes each = 1024 bytes
-  { "24c16", 2048 }, // 128 pages of 16 bytes each = 2048 bytes
-  { "24c32", 4096 }, // 32kbit = 4kbyte
-  { "24c64", 8192 },
-  { "24c128", 16384 },
-  { "24c256", 32768 },
-  { "24c512", 65536 },
+  { "24c01",   128   }, // 16 pages of 8 bytes each = 128 bytes
+  { "24c02",   256   }, // 32 pages of 8 bytes each = 256 bytes
+  { "24c04",   512   }, // 32 pages of 16 bytes each = 512 bytes
+  { "24c08",   1024  }, // 64 pages of 16 bytes each = 1024 bytes
+  { "24c16",   2048  }, // 128 pages of 16 bytes each = 2048 bytes
+  { "24c32",   4096  }, // 32kbit = 4kbyte
+  { "24c64",   8192  },
+  { "24c128",  16384 },
+  { "24c256",  32768 },
+  { "24c512",  65536 },
   { "24c1024", 131072},
   { 0, 0}
 };
