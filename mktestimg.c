@@ -33,9 +33,9 @@ int main(int argc, char **argv)
     char chip;
     static char *hex = "\00\x11\x22\x33\x44\x55\x66\x77\x88\x99\xaa\xbb\xcc\xdd\xee\xff";
 
-    printf("Select chip type:\n\na for 24c01\nb for 24c02\nc for 24c04\nd for 24c08\
-            e for 24c16\nf for 24c32\ng for 24c64\nh for 24c128\ni for 24c256\
-            l for 24c512\nm for 24c1024\n\nInsert a letter:");
+    printf("Select chip type:\n\na for 24c01\nb for 24c02\nc for 24c04\nd for 24c08\n"\
+           "e for 24c16\nf for 24c32\ng for 24c64\nh for 24c128\ni for 24c256\n"\
+           "l for 24c512\nm for 24c1024\n\nInsert a letter:");
     scanf("%c",&chip);
     getchar();
 
