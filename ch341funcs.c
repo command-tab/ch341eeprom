@@ -198,7 +198,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
     byteoffset = 0;
 
     while (1) {
-        fprintf(stdout, "Read [%d] of [%d] bytes      \r", byteoffset, bytestoread);
+        fprintf(stdout, "Read %d%% [%d] of [%d] bytes      \r", 100*byteoffset/bytestoread, byteoffset, bytestoread);
 		ret = libusb_handle_events_timeout(NULL, &tv);
 
 		if (ret < 0 || getnextpkt == -1) {          // indicates an error
@@ -352,7 +352,7 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
             fprintf(stderr, "Failed to write to EEPROM: '%s'\n", strerror(-ret));
             return -1;
         }
-        fprintf(stdout, "Written [%d] of [%d] bytes      \r", bytes, bytesum);
+        fprintf(stdout, "Written %d%% [%d] of [%d] bytes      \r", 100*(bytesum-bytes)/bytesum, bytesum-bytes, bytesum);
     }
     return 0;   
 } 
