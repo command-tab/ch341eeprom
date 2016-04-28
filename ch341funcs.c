@@ -178,7 +178,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
     fprintf(debugout, "Allocated USB transfer structures\n");
 
     memset(ch341inBuffer, 0, EEPROM_READ_BULKIN_BUF_SZ);    
-    memcpy(ch341outBuffer, CH341_EEPROM_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
+    memcpy(ch341outBuffer, CH341_EEPROM_24c64_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
 
     libusb_fill_bulk_transfer(xferBulkIn,  devHandle, BULK_READ_ENDPOINT, ch341inBuffer, 
         EEPROM_READ_BULKIN_BUF_SZ, cbBulkIn, NULL, DEFAULT_TIMEOUT);
@@ -227,7 +227,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
                 fprintf(debugout, "\nSubmitting next transfer request to BULK OUT endpoint\n");
                 readpktcount = 0;
 
-                memcpy(ch341outBuffer, CH341_EEPROM_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
+                memcpy(ch341outBuffer, CH341_EEPROM_24c64_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
                 ch341outBuffer[4] = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
                 ch341outBuffer[5] = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
