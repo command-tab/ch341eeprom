@@ -95,16 +95,15 @@
 
 /* CH341a READ EEPROM setup packet for the 24c01
    this needs putting into a struct to allow convenient access to individual elements*/
-#define CH341_EEPROM_24c01_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1\x\xe0\x00\x0f\x00\x06\x04\x00\x00" \
-					  "\x00\x00\x00\x00\x01\x00\x00\x00\x\x11\x4d\x40\x77\xcd\xab\xba\xdc" \
-					  "\xaa\xe0\x00\x00\xc4\xf1\x12\x00\x\x11\x4d\x40\x77\xf0\xf1\x12\x00" \
-					  "\xd9\x8b\x41\x7e\x00\xd0\xfd\x7f\x\xf0\xf1\x12\x00\x5a\x88\x41\x7e" \
-					  "\xaa\xe0\x00\x00\x2a\x88\x41\x7e\x\x06\x04\x00\x00\x11\x4d\x40\x77" \
-					  "\xe8\xf3\x12\x00\x14\x00\x00\x00\x\x01\x00\x00\x00\x00\x00\x00\x00" \
+#define CH341_EEPROM_24c01_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1\xe0\x00\x0f\x00\x06\x04\x00\x00" \
+					  "\x00\x00\x00\x00\x01\x00\x00\x00\x11\x4d\x40\x77\xcd\xab\xba\xdc" \
+					  "\xaa\xe0\x00\x00\xc4\xf1\x12\x00\x11\x4d\x40\x77\xf0\xf1\x12\x00" \
+					  "\xd9\x8b\x41\x7e\x00\xd0\xfd\x7f\xf0\xf1\x12\x00\x5a\x88\x41\x7e" \
+					  "\xaa\xe0\x00\x00\x2a\x88\x41\x7e\x06\x04\x00\x00\x11\x4d\x40\x77" \
+					  "\xe8\xf3\x12\x00\x14\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00" \
 					  "\xaa\xdf\xc0\x75\x00"
 /* please se file /wiresharkusbsniffing/sniffed.txt
-
-this is the read setup packet for 24c01
+   this is the read setup packet for 24c01
 
 0040  aa 74 82 a0 00 74 81 a1  e0 00 0f 00 06 04 00 00   .t...t.. ........
 0050  00 00 00 00 01 00 00 00  11 4d 40 77 cd ab ba dc   ........ .M@w....
@@ -115,8 +114,50 @@ this is the read setup packet for 24c01
 00a0  aa df c0 75 00                                     ...u. 
 */
 
-
 /* CH341a READ EEPROM next packet for 24c01  (no packets!!!)*/
+
+
+/* CH341a READ EEPROM setup packet for the 24c02
+   this needs putting into a struct to allow convenient access to individual elements*/
+#define CH341_EEPROM_24c02_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1\xe0\x00\x10\x00\x06\x04\x00\x00" \
+					  "\x00\x00\x00\x00\x02\x00\x00\x00\x11\x4d\x40\x77\xcd\xab\xba\xdc" \
+					  "\xaa\xe0\x00\x00\xc4\xf1\x12\x00\x11\x4d\x40\x77\xf0\xf1\x12\x00" \
+					  "\xd9\x8b\x41\x7e\x00\xf0\xfd\x7f\xf0\xf1\x12\x00\x5a\x88\x41\x7e" \
+					  "\xaa\xe0\x00\x00\x2a\x88\x41\x7e\x06\x04\x00\x00\x11\x4d\x40\x77" \
+					  "\xe8\xf3\x12\x00\x14\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00" \
+					  "\xaa\xdf\xc0\x75\x00"
+/* please se file /wiresharkusbsniffing/sniffed.txt
+   this is the read setup packet for 24c02
+
+0040  aa 74 82 a0 00 74 81 a1  e0 00 10 00 06 04 00 00   .t...t.. ........
+0050  00 00 00 00 02 00 00 00  11 4d 40 77 cd ab ba dc   ........ .M@w....
+0060  aa e0 00 00 c4 f1 12 00  11 4d 40 77 f0 f1 12 00   ........ .M@w....
+0070  d9 8b 41 7e 00 f0 fd 7f  f0 f1 12 00 5a 88 41 7e   ..A~.... ....Z.A~
+0080  aa e0 00 00 2a 88 41 7e  06 04 00 00 11 4d 40 77   ....*.A~ .....M@w
+0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
+00a0  aa df c0 75 00                                     ...u. 
+*/
+
+/* CH341a READ EEPROM next packet for 24c02  (one packet)*/
+#define CH341_EEPROM_24c02_READ_NEXT_CMD "\xaa\x74\x82\xa0\x80\x74\x81\xa1\xe0\x00\x00\x00\x10\x00\x00\x00" \
+					  "\x00\x00\x00\x00\x8c\xf1\x12\x00\x01\x00\x00\x00\x00\x00\x00\x00" \
+					  "\xaa\xe0\x00\x00\x4c\xf1\x12\x00\x5d\x22\xd7\x5a\xdc\xf1\x12\x00" \
+					  "\x8f\x04\x44\x7e\x30\x88\x41\x7e\xff\xff\xff\xff\x2a\x88\x41\x7e" \
+					  "\xaa\xe0\x00\x7e\x00\x00\x00\x00\x69\x0e\x3c\x00\xe4\x00\x18\x00" \
+					  "\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x8c\xe8\x67\x00" \
+					  "\xaa\xdf\xc0\x75\x00"
+/*please see file /wiresharkusbsniffing/sniffed.txt
+  this is the read next packet for 24c02  (one packet)
+
+0040  aa 74 82 a0 80 74 81 a1  e0 00 00 00 10 00 00 00   .t...t.. ........
+0050  00 00 00 00 8c f1 12 00  01 00 00 00 00 00 00 00   ........ ........
+0060  aa e0 00 00 4c f1 12 00  5d 22 d7 5a dc f1 12 00   ....L... ]".Z....
+0070  8f 04 44 7e 30 88 41 7e  ff ff ff ff 2a 88 41 7e   ..D~0.A~ ....*.A~
+0080  aa e0 00 7e 00 00 00 00  69 0e 3c 00 e4 00 18 00   ...~.... i.<.....
+0090  0f 00 00 00 00 00 00 00  00 00 00 00 8c e8 67 00   ........ ......g.
+00a0  aa df c0 75 00   
+*/
+
 
 /* CH341a READ EEPROM setup packet for the 24c64
    this needs putting into a struct to allow convenient access to individual elements*/
@@ -128,8 +169,7 @@ this is the read setup packet for 24c01
 					  "\xe8\xf3\x12\x00\x14\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00" \
 					  "\xaa\xdf\xc0\x75\x00" 
 /* please se file /wiresharkusbsniffing/sniffed.txt
-
-this is the read setup packet for 24c64
+   this is the read setup packet for 24c64
 
 0040  aa 74 83 a0 00 00 74 81  a1 e0 00 00 06 04 00 00   .t....t. ........
 0050  00 00 00 00 40 00 00 00  11 4d 40 77 cd ab ba dc   ....@... .M@w....
@@ -140,7 +180,6 @@ this is the read setup packet for 24c64
 00a0  aa df c0 75 00                                       ...u.  
 */
 
-
 /* CH341a READ EEPROM next packet for 24c64  (63 packets)*/
 #define CH341_EEPROM_24c64_READ_NEXT_CMD  "\xaa\x74\x83\xa0\x00\x00\x74\x81\xa1\xe0\x00\x00\x10\x00\x00\x00" \
 					  "\x00\x00\x00\x00\x8c\xf1\x12\x00\x01\x00\x00\x00\x00\x00\x00\x00" \
@@ -149,10 +188,8 @@ this is the read setup packet for 24c64
 					  "\xaa\xe0\x00\x7e\x00\x00\x00\x00\x69\x0e\x3c\x00\x12\x01\x19\x00" \
 					  "\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x9c\x2e\x68\x00" \
 					  "\xaa\xdf\xc0\x75\x00"
-
-/*please see file /wiresharkusbsniffing/sniffed.txt
-
-this is the read next packet for 24c64  (63 packets)
+/* please see file /wiresharkusbsniffing/sniffed.txt
+   this is the read next packet for 24c64  (63 packets)
 
 0040  aa 74 83 a0 00 80 74 81  a1 e0 00 00 10 00 00 00   .t....t. ........
 0050  00 00 00 00 8c f1 12 00  01 00 00 00 00 00 00 00   ........ ........
