@@ -93,6 +93,31 @@
 #define CH341_I2C_FAST_SPEED 2              // fast speed - 400kHz
 #define CH341_I2C_HIGH_SPEED 3              // high speed - 750kHz
 
+/* CH341a READ EEPROM setup packet for the 24c01
+   this needs putting into a struct to allow convenient access to individual elements*/
+#define CH341_EEPROM_24c01_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1\x\xe0\x00\x0f\x00\x06\x04\x00\x00" \
+					  "\x00\x00\x00\x00\x01\x00\x00\x00\x\x11\x4d\x40\x77\xcd\xab\xba\xdc" \
+					  "\xaa\xe0\x00\x00\xc4\xf1\x12\x00\x\x11\x4d\x40\x77\xf0\xf1\x12\x00" \
+					  "\xd9\x8b\x41\x7e\x00\xd0\xfd\x7f\x\xf0\xf1\x12\x00\x5a\x88\x41\x7e" \
+					  "\xaa\xe0\x00\x00\x2a\x88\x41\x7e\x\x06\x04\x00\x00\x11\x4d\x40\x77" \
+					  "\xe8\xf3\x12\x00\x14\x00\x00\x00\x\x01\x00\x00\x00\x00\x00\x00\x00" \
+					  "\xaa\xdf\xc0\x75\x00"
+/* please se file /wiresharkusbsniffing/sniffed.txt
+
+this is the read setup packet for 24c01
+
+0040  aa 74 82 a0 00 74 81 a1  e0 00 0f 00 06 04 00 00   .t...t.. ........
+0050  00 00 00 00 01 00 00 00  11 4d 40 77 cd ab ba dc   ........ .M@w....
+0060  aa e0 00 00 c4 f1 12 00  11 4d 40 77 f0 f1 12 00   ........ .M@w....
+0070  d9 8b 41 7e 00 d0 fd 7f  f0 f1 12 00 5a 88 41 7e   ..A~.... ....Z.A~
+0080  aa e0 00 00 2a 88 41 7e  06 04 00 00 11 4d 40 77   ....*.A~ .....M@w
+0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
+00a0  aa df c0 75 00                                     ...u. 
+*/
+
+
+/* CH341a READ EEPROM next packet for 24c01  (no packets!!!)*/
+
 /* CH341a READ EEPROM setup packet for the 24c64
    this needs putting into a struct to allow convenient access to individual elements*/
 #define CH341_EEPROM_24c64_READ_SETUP_CMD "\xaa\x74\x83\xa0\x00\x00\x74\x81\xa1\xe0\x00\x00\x06\x04\x00\x00" \
@@ -114,7 +139,6 @@ this is the read setup packet for 24c64
 0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
 00a0  aa df c0 75 00                                       ...u.  
 */
-
 
 
 /* CH341a READ EEPROM next packet for 24c64  (63 packets)*/
