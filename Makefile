@@ -13,3 +13,11 @@ test256: default
 	rm -f tmp_random.bin tmp_random_readed.bin
 	echo "Test 256Kbit EEPROM done"
 
+test1024: default
+	dd if=/dev/urandom of=tmp_random.bin bs=128 count=1024
+	./ch341eeprom -v -s 1024 -w tmp_random.bin
+	./ch341eeprom -v -s 1024 -r tmp_random_readed.bin
+	cmp tmp_random.bin tmp_random_readed.bin
+	rm -f tmp_random.bin tmp_random_readed.bin
+	echo "Test 1024Kbit EEPROM done"
+

@@ -29,7 +29,7 @@
 extern FILE *debugout, *verbout;
 uint32_t getnextpkt;                            // set by the callback function
 uint32_t syncackpkt;                            // synch / ack flag used by BULK OUT cb function
-uint16_t byteoffset;
+uint32_t byteoffset;
 uint8_t *readbuf;
 
 // --------------------------------------------------------------------------
@@ -228,6 +228,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
                 readpktcount = 0;
 
                 memcpy(ch341outBuffer, CH341_EEPROM_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
+                ch341outBuffer[3] = (uint8_t) (0xa0 | (byteoffset >> 16 & 0x07) << 1);  // EEPROM device address
                 ch341outBuffer[4] = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
                 ch341outBuffer[5] = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
@@ -286,7 +287,8 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
 
     uint8_t ch341outBuffer[EEPROM_WRITE_BUF_SZ], *outptr, *bufptr;
     int32_t ret = 0, i;
-    uint16_t byteoffset = 0, bytes = bytesum;
+    uint32_t byteoffset = 0;
+    uint32_t bytes = bytesum;
     uint8_t addrbytecount = 3;  // 24c32 and 24c64 (and other 24c??) use 3 bytes for addressing
     int32_t actuallen = 0;
 
@@ -297,7 +299,7 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
         *outptr++ = mCH341A_CMD_I2C_STREAM;
         *outptr++ = mCH341A_CMD_I2C_STM_STA;
         *outptr++ = mCH341A_CMD_I2C_STM_OUT + addrbytecount + MIN(bytes, 25);
-        *outptr++ = 0xa0;                                   // EEPROM device address
+        *outptr++ = (uint8_t) (0xa0 | (byteoffset >> 16 & 0x07)<<1);  // EEPROM device address
         *outptr++ = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
         *outptr++ = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
