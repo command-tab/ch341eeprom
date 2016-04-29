@@ -114,6 +114,35 @@
                                     "\xaa\xdf\xc0\x75\x00"
 #define CH341_EEPROM_READ_CMD_SZ 0x65
 
+// for 24c02
+#define CH341_EEPROM1_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1" \
+                                     "\xe0\x00\x12\x00\xc3\xef\x3d\x77" \
+                                     "\x2a\xf0\x3d\x77\x28\x00\x00\x00" \
+                                     "\x41\x7c\x43\x00\x01\x00\x00\x00" \
+                                     "\xaa\xe0\x00\x00\x65\x41\x40\x00" \
+                                     "\x00\x00\x00\x00\x00\x00\x00\x00" \
+                                     "\x80\x07\x00\x00\x28\x00\x00\x00" \
+                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
+                                     "\xaa\xe0\x00\x00\x00\x00\x00\x00" \
+                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
+                                     "\xee\x00\x01\x00\x00\x00\x00\x00" \
+                                     "\x53\x00\x01\x01\x00\x00\x00\x00" \
+                                     "\xaa\xdf\xc0\x75\x00"
+
+#define CH341_EEPROM1_READ_NEXT_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1" \
+                                     "\xe0\x00\x12\x00\xc3\xef\x3d\x77" \
+                                     "\x2a\xf0\x3d\x77\x28\x00\x00\x00" \
+                                     "\x41\x7c\x43\x00\x01\x00\x00\x00" \
+                                     "\xaa\xe0\x00\x00\x65\x41\x40\x00" \
+                                     "\x00\x00\x00\x00\x00\x00\x00\x00" \
+                                     "\x80\x07\x00\x00\x28\x00\x00\x00" \
+                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
+                                     "\xaa\xe0\x00\x00\x00\x00\x00\x00" \
+                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
+                                     "\xee\x00\x01\x00\x00\x00\x00\x00" \
+                                     "\x53\x00\x01\x01\x00\x00\x00\x00" \
+                                     "\xaa\xdf\xc0\x75\x00"
+
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
@@ -123,29 +152,32 @@
 struct EEPROM {
     char *name;
     uint32_t size;
+    uint16_t page_size;
+    uint8_t addr_size; // Length of addres in bytes
+    uint8_t i2c_addr_mask;
 };
 
 const static struct EEPROM eepromlist[] = {
-  { "24c01",   128   }, // 16 pages of 8 bytes each = 128 bytes
-  { "24c02",   256   }, // 32 pages of 8 bytes each = 256 bytes
-  { "24c04",   512   }, // 32 pages of 16 bytes each = 512 bytes
-  { "24c08",   1024  }, // 64 pages of 16 bytes each = 1024 bytes
-  { "24c16",   2048  }, // 128 pages of 16 bytes each = 2048 bytes
-  { "24c32",   4096  }, // 32kbit = 4kbyte
-  { "24c64",   8192  },
-  { "24c128",  16384 },
-  { "24c256",  32768 },
-  { "24c512",  65536 },
-  { "24c1024", 131072},
-  { 0, 0}
+  { "24c01",   128,     8,  1, 0x00}, // 16 pages of 8 bytes each = 128 bytes
+  { "24c02",   256,     8,  1, 0x00}, // 32 pages of 8 bytes each = 256 bytes
+  { "24c04",   512,    16,  1, 0x01}, // 32 pages of 16 bytes each = 512 bytes
+  { "24c08",   1024,   16,  1, 0x03}, // 64 pages of 16 bytes each = 1024 bytes
+  { "24c16",   2048,   16,  1, 0x07}, // 128 pages of 16 bytes each = 2048 bytes
+  { "24c32",   4096,   32,  2, 0x00}, // 32kbit = 4kbyte
+  { "24c64",   8192,   32,  2, 0x00},
+  { "24c128",  16384,  32/*64*/,  2, 0x00},
+  { "24c256",  32768,  32/*64*/,  2, 0x00},
+  { "24c512",  65536,  32/*128*/, 2, 0x00},
+  { "24c1024", 131072, 32/*128*/, 2, 0x01},
+  { 0, 0, 0, 0 }
 };
 
 
-int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buf, uint32_t bytes);
-int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buf, uint32_t bytes);
+int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buf, uint32_t bytes, struct EEPROM* eeprom_info);
+int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buf, uint32_t bytes, struct EEPROM* eeprom_info);
 struct libusb_device_handle *ch341configure(uint16_t vid, uint16_t pid);
 int32_t ch341setstream(struct libusb_device_handle *devHandle, uint32_t speed);
-int32_t parseEEPsize(char *eepromname);
+int32_t parseEEPsize(char* eepromname, struct EEPROM *eeprom);
 
 // callback functions for async USB transfers
 void cbBulkIn(struct libusb_transfer *transfer);

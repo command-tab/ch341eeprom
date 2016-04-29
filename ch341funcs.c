@@ -159,7 +159,7 @@ int32_t ch341setstream(struct libusb_device_handle *devHandle, uint32_t speed) {
 // --------------------------------------------------------------------------
 // ch341readEEPROM()
 //      read n bytes from device (in packets of 32 bytes)
-int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer, uint32_t bytestoread) {
+int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer, uint32_t bytestoread, struct EEPROM *eeprom_info) {
 
     uint8_t ch341outBuffer[EEPROM_READ_BULKOUT_BUF_SZ];
     uint8_t ch341inBuffer[IN_BUF_SZ];               // 0x100 bytes
@@ -178,13 +178,17 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
     fprintf(debugout, "Allocated USB transfer structures\n");
 
     memset(ch341inBuffer, 0, EEPROM_READ_BULKIN_BUF_SZ);    
-    memcpy(ch341outBuffer, CH341_EEPROM_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
+    if ((*eeprom_info).addr_size >= 2) {
+        memcpy(ch341outBuffer, CH341_EEPROM_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
+    } else {
+        memcpy(ch341outBuffer, CH341_EEPROM1_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
+    }
 
     libusb_fill_bulk_transfer(xferBulkIn,  devHandle, BULK_READ_ENDPOINT, ch341inBuffer, 
         EEPROM_READ_BULKIN_BUF_SZ, cbBulkIn, NULL, DEFAULT_TIMEOUT);
 
     libusb_fill_bulk_transfer(xferBulkOut, devHandle, BULK_WRITE_ENDPOINT, 
-        ch341outBuffer, EEPROM_READ_BULKOUT_BUF_SZ,cbBulkOut, NULL, DEFAULT_TIMEOUT);
+        ch341outBuffer, EEPROM_READ_BULKOUT_BUF_SZ, cbBulkOut, NULL, DEFAULT_TIMEOUT);
 
     fprintf(debugout, "Filled USB transfer structures\n");
 
@@ -227,14 +231,22 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
                 fprintf(debugout, "\nSubmitting next transfer request to BULK OUT endpoint\n");
                 readpktcount = 0;
 
-                memcpy(ch341outBuffer, CH341_EEPROM_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
-                ch341outBuffer[3] = (uint8_t) (0xa0 | (byteoffset >> 16 & 0x07) << 1);  // EEPROM device address
-                ch341outBuffer[4] = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
-                ch341outBuffer[5] = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
+                if ((*eeprom_info).addr_size >= 2) {
+                    memcpy(ch341outBuffer, CH341_EEPROM_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
+                    // 2byte address
+                    ch341outBuffer[3] = (uint8_t) (0xa0 | (byteoffset >> 16 & (*eeprom_info).i2c_addr_mask) << 1);  // EEPROM device address
+                    ch341outBuffer[4] = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
+                    ch341outBuffer[5] = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
-                libusb_fill_bulk_transfer(xferBulkOut, devHandle, BULK_WRITE_ENDPOINT, ch341outBuffer, 
+                } else {
+                    // 1byte address
+                    memcpy(ch341outBuffer, CH341_EEPROM1_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
+                    ch341outBuffer[3] = (uint8_t) (0xa0 | (byteoffset >> 8 & (*eeprom_info).i2c_addr_mask) << 1);  // EEPROM device address
+                    ch341outBuffer[4] = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
+                }
+                libusb_fill_bulk_transfer(xferBulkOut, devHandle, BULK_WRITE_ENDPOINT, ch341outBuffer,
                                     EEPROM_READ_BULKOUT_BUF_SZ, cbBulkOut, NULL, DEFAULT_TIMEOUT);
-                
+
                 libusb_submit_transfer(xferBulkOut);// update transfer struct (with new EEPROM page offset)
                                                     // and re-submit next transfer request to BULK OUT endpoint
             }
@@ -283,50 +295,61 @@ void cbBulkOut(struct libusb_transfer *transfer) {
 // --------------------------------------------------------------------------
 // ch341writeEEPROM()
 //      write n bytes to 24c32/24c64 device (in packets of 32 bytes)
-int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer, uint32_t bytesum) {
+int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer, uint32_t bytesum, struct EEPROM *eeprom_info) {
 
-    uint8_t ch341outBuffer[EEPROM_WRITE_BUF_SZ], *outptr, *bufptr;
+    uint8_t ch341outBuffer[512/*EEPROM_WRITE_BUF_SZ*/];
+    uint8_t *outptr, *bufptr;
+    uint8_t i2cCmdBuffer[256];
     int32_t ret = 0, i;
     uint32_t byteoffset = 0;
     uint32_t bytes = bytesum;
-    uint8_t addrbytecount = 3;  // 24c32 and 24c64 (and other 24c??) use 3 bytes for addressing
+    uint8_t addrbytecount = (*eeprom_info).addr_size+1;  // 24c32 and 24c64 (and other 24c??) use 3 bytes for addressing
     int32_t actuallen = 0;
+    uint16_t page_size = (*eeprom_info).page_size;
 
     bufptr = buffer;
 
     while(bytes) {
-        outptr    = ch341outBuffer;
-        *outptr++ = mCH341A_CMD_I2C_STREAM;
-        *outptr++ = mCH341A_CMD_I2C_STM_STA;
-        *outptr++ = mCH341A_CMD_I2C_STM_OUT + addrbytecount + MIN(bytes, 25);
-        *outptr++ = (uint8_t) (0xa0 | (byteoffset >> 16 & 0x07)<<1);  // EEPROM device address
-        *outptr++ = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
+        outptr = i2cCmdBuffer;
+        if ((*eeprom_info).addr_size >= 2) {
+            *outptr++ = (uint8_t) (0xa0 | (byteoffset >> 16 & (*eeprom_info).i2c_addr_mask)<<1);  // EEPROM device address
+            *outptr++ = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
+        } else {
+            *outptr++ = (uint8_t) (0xa0 | (byteoffset >> 8 & (*eeprom_info).i2c_addr_mask)<<1);  // EEPROM device address
+        }
         *outptr++ = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
-        memcpy(outptr, bufptr, MIN(bytes, 25));             // payload has two parts: 25 bytes & up to 7 more bytes
+        memcpy(outptr, bufptr, page_size); // Copy one page
 
-        outptr += MIN(bytes, 25);
-        bufptr += MIN(bytes, 25);
-        bytes  -= MIN(bytes, 25);
+        byteoffset += page_size;
+        bufptr     += page_size;
+        bytes      -= page_size;
 
-        *outptr++ = mCH341A_CMD_I2C_STM_END;
-
-        if(bytes) {
+        outptr    = ch341outBuffer;
+        uint16_t page_size_left = page_size + addrbytecount;
+        uint8_t part_no = 0;
+        uint8_t *i2cBufPtr = i2cCmdBuffer;
+        while(page_size_left) {
+            uint8_t to_write = MIN(page_size_left, 28);
             *outptr++ = mCH341A_CMD_I2C_STREAM;
-            *outptr++ = mCH341A_CMD_I2C_STM_OUT + MIN(bytes, 7);
-            memcpy(outptr, bufptr, MIN(bytes, 7));
+            if (part_no == 0) { // Start packet
+                *outptr++ = mCH341A_CMD_I2C_STM_STA;
+            }
+            *outptr++ = mCH341A_CMD_I2C_STM_OUT | to_write;
+            memcpy(outptr, i2cBufPtr, to_write);
+            outptr += to_write;
+            i2cBufPtr += to_write;
+            page_size_left -= to_write;
 
-            outptr += MIN(bytes, 7);
-            bufptr += MIN(bytes, 7);
-            bytes  -= MIN(bytes, 7);
+            if (page_size_left == 0) { // Stop packet
+                *outptr++ = mCH341A_CMD_I2C_STM_STO;
+            }
+            *outptr++ = mCH341A_CMD_I2C_STM_END;
+            part_no++;
         }
-    
-        *outptr++ = mCH341A_CMD_I2C_STM_STO;
-        *outptr   = mCH341A_CMD_I2C_STM_END;
+        uint32_t payload_size = outptr - ch341outBuffer;
 
-        byteoffset += 0x20;
-
-        for(i=0; i < EEPROM_WRITE_BUF_SZ; i++) {
+        for(i=0; i < payload_size; i++) {
             if(!(i%0x10))
                 fprintf(debugout, "\n%04x : ", i);
             fprintf(debugout, "%02x ", ch341outBuffer[i]);
@@ -334,7 +357,7 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
         fprintf(debugout, "\n");
 
         ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT,
-            ch341outBuffer, EEPROM_WRITE_BUF_SZ, &actuallen, DEFAULT_TIMEOUT);
+            ch341outBuffer, payload_size, &actuallen, DEFAULT_TIMEOUT);
 
         if(ret < 0) {
             fprintf(stderr, "Failed to write to EEPROM: '%s'\n", strerror(-ret));
@@ -354,6 +377,16 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
             fprintf(stderr, "Failed to write to EEPROM: '%s'\n", strerror(-ret));
             return -1;
         }
+
+        /*
+        struct timeval tv = {0, 100};                   // our async polling interval
+		ret = libusb_handle_events_timeout(NULL, &tv);
+		if (ret < 0) {          // indicates an error
+            fprintf(stderr, "ret from libusb_handle_timeout = %d\n", ret);
+            fprintf(stderr, "USB read error : %s\n", strerror(-ret));
+            return -1;
+        }
+        */
         fprintf(stdout, "Written %d%% [%d] of [%d] bytes      \r", 100*(bytesum-bytes)/bytesum, bytesum-bytes, bytesum);
     }
     return 0;   
@@ -363,11 +396,14 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
 // --------------------------------------------------------------------------
 // parseEEPsize()
 //   passed an EEPROM name (case-sensitive), returns its byte size
-int32_t parseEEPsize(char *eepromname) {
+int32_t parseEEPsize(char* eepromname, struct EEPROM *eeprom) {
     int i;
 
     for(i=0; eepromlist[i].size; i++)
-        if(strstr(eepromlist[i].name, eepromname))
+        if(strstr(eepromlist[i].name, eepromname)) {
+            memcpy(eeprom, &(eepromlist[i]), sizeof(struct EEPROM));
             return(eepromlist[i].size);
+        }
     return -1;
 }
+
