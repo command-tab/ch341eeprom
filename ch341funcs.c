@@ -181,7 +181,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
     if ((*eeprom_info).addr_size >= 2) {
         memcpy(ch341outBuffer, CH341_EEPROM_24c64_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
     } else {
-        memcpy(ch341outBuffer, CH341_EEPROM_24c02_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
+        memcpy(ch341outBuffer, CH341_EEPROM1_READ_SETUP_CMD, EEPROM_READ_BULKOUT_BUF_SZ);
     }
 
     libusb_fill_bulk_transfer(xferBulkIn,  devHandle, BULK_READ_ENDPOINT, ch341inBuffer, 
@@ -240,7 +240,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
 
                 } else {
                     // 1byte address
-                    memcpy(ch341outBuffer, CH341_EEPROM_24c02_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
+                    memcpy(ch341outBuffer, CH341_EEPROM1_READ_NEXT_CMD, CH341_EEPROM_READ_CMD_SZ);
                     ch341outBuffer[3] = (uint8_t) (0xa0 | (byteoffset >> 8 & (*eeprom_info).i2c_addr_mask) << 1);  // EEPROM device address
                     ch341outBuffer[4] = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
                 }
