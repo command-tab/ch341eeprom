@@ -5,7 +5,7 @@ default:
 clean:
 	rm -f ch341eeprom mktestimg
 
-test2: default
+test02: default
 	dd if=/dev/urandom of=tmp_random.bin bs=128 count=2
 	./ch341eeprom -v -s 24c02 -w tmp_random.bin
 	./ch341eeprom -v -s 24c02 -r tmp_random_readed.bin
@@ -13,7 +13,7 @@ test2: default
 	rm -f tmp_random.bin tmp_random_readed.bin
 	echo "Test 2Kbit/256bytes EEPROM done"
 
-test8: default
+test08: default
 	dd if=/dev/urandom of=tmp_random.bin bs=128 count=8
 	./ch341eeprom -v -s 24c08 -w tmp_random.bin
 	./ch341eeprom -v -s 24c08 -r tmp_random_readed.bin

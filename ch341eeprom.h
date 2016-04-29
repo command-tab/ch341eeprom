@@ -28,10 +28,10 @@
 #define	mCH341_PACKET_LENGTH		32
 #define	mCH341_PKT_LEN_SHORT		8
 
-#define	mCH341_ENDP_INTER_UP		0x81
-#define	mCH341_ENDP_INTER_DOWN		0x01
-#define	mCH341_ENDP_DATA_UP		0x82
-#define	mCH341_ENDP_DATA_DOWN		0x02
+#define	mCH341_ENDP_INTER_UP        0x81
+#define	mCH341_ENDP_INTER_DOWN      0x01
+#define	mCH341_ENDP_DATA_UP         0x82
+#define	mCH341_ENDP_DATA_DOWN       0x02
 
 #define	mCH341_VENDOR_READ		0xC0
 #define	mCH341_VENDOR_WRITE		0x40

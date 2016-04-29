@@ -71,6 +71,8 @@ If not, see <http://www.gnu.org/licenses/>.
 | Name              | Write | Read |
 +-------------------+-------+------+
 | CAT24M01WI        |  OK   |  OK  |
+| AT24C256          |  OK   |  OK  |
 | Microchip 24LC256 |  OK   |  OK  |
 | AT24C32N          |  OK   |  OK  |
-| AT24C08           |  OK   | fail |
+| AT24C08           |  OK   |  OK  |
+
