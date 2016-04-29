@@ -39,6 +39,8 @@ int main(int argc, char **argv) {
     char *filename = NULL, eepromname[12], operation = 0;
     FILE *fp;
 
+    struct EEPROM eeprom_info;
+
     static char version_msg[] =    
         "ch341eeprom - an i2c EEPROM programming tool for the WCH CH341a IC\n" \
         "Version " CH341TOOLVERSION  " copyright (c) 2011 asbokid <ballymunboy@gmail.com>\n\n" \
@@ -81,7 +83,7 @@ int main(int argc, char **argv) {
                       break;
             case 'd': debug = TRUE;
                       break;
-            case 's': if((eepromsize = parseEEPsize(optarg)) > 0)
+            case 's': if((eepromsize = parseEEPsize(optarg, &eeprom_info)) > 0)
                         strncpy(eepromname, optarg, 10);
                       break;
             case 'e': if(!operation)
@@ -152,7 +154,7 @@ int main(int argc, char **argv) {
         case 'r':   // read
             memset(readbuf, 0xff, MAX_EEPROM_SIZE);
 
-            if(ch341readEEPROM(devHandle, readbuf, eepromsize) < 0) {
+            if(ch341readEEPROM(devHandle, readbuf, eepromsize, &eeprom_info) < 0) {
                 fprintf(stderr, "Couldnt read [%d] bytes from [%s] EEPROM\n", eepromsize, eepromname);
                 goto shutdown;
             }
@@ -201,7 +203,7 @@ int main(int argc, char **argv) {
             if(bytesread > eepromsize)
                 fprintf(stdout, "Truncated to [%d] bytes for [%s] EEPROM\n", eepromsize, eepromname);
 
-            if(ch341writeEEPROM(devHandle, readbuf, eepromsize) < 0) {
+            if(ch341writeEEPROM(devHandle, readbuf, eepromsize, &eeprom_info) < 0) {
                 fprintf(stderr,"Failed to write [%d] bytes from [%s] to [%s] EEPROM\n", eepromsize, filename, eepromname);
                 goto shutdown;
             }
@@ -209,7 +211,7 @@ int main(int argc, char **argv) {
             break;
         case 'e': // erase
             memset(readbuf, 0xff, MAX_EEPROM_SIZE);
-            if(ch341writeEEPROM(devHandle, readbuf, eepromsize) < 0) {
+            if(ch341writeEEPROM(devHandle, readbuf, eepromsize, &eeprom_info) < 0) {
                 fprintf(stderr,"Failed to erase [%d] bytes of [%s] EEPROM\n", eepromsize, eepromname);
                 goto shutdown;
             }
