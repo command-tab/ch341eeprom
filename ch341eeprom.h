@@ -332,34 +332,6 @@
 
 #define CH341_EEPROM_READ_CMD_SZ 0x65 /* Same size for all 24cXX read setup and next packets*/
 
-// for 24c02
-#define CH341_EEPROM1_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1" \
-                                     "\xe0\x00\x12\x00\xc3\xef\x3d\x77" \
-                                     "\x2a\xf0\x3d\x77\x28\x00\x00\x00" \
-                                     "\x41\x7c\x43\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x65\x41\x40\x00" \
-                                     "\x00\x00\x00\x00\x00\x00\x00\x00" \
-                                     "\x80\x07\x00\x00\x28\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x00\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xee\x00\x01\x00\x00\x00\x00\x00" \
-                                     "\x53\x00\x01\x01\x00\x00\x00\x00" \
-                                     "\xaa\xdf\xc0\x75\x00"
-
-#define CH341_EEPROM1_READ_NEXT_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1" \
-                                     "\xe0\x00\x12\x00\xc3\xef\x3d\x77" \
-                                     "\x2a\xf0\x3d\x77\x28\x00\x00\x00" \
-                                     "\x41\x7c\x43\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x65\x41\x40\x00" \
-                                     "\x00\x00\x00\x00\x00\x00\x00\x00" \
-                                     "\x80\x07\x00\x00\x28\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x00\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xee\x00\x01\x00\x00\x00\x00\x00" \
-                                     "\x53\x00\x01\x01\x00\x00\x00\x00" \
-                                     "\xaa\xdf\xc0\x75\x00"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
