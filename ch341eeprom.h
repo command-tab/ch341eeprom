@@ -10,6 +10,8 @@
 
 #define MAX_EEPROM_SIZE             131072 /* For 24c1024*/
 
+#define EEPROM_I2C_BUS_ADDRESS      0x50
+
 #define BULK_WRITE_ENDPOINT         0x02   /* bEndpointAddress 0x02  EP 2 OUT (Bulk)*/
 #define BULK_READ_ENDPOINT          0x82   /* bEndpointAddress 0x82  EP 2 IN  (Bulk)*/
 #define DEFAULT_INTERFACE           0x00
@@ -69,7 +71,7 @@
 #define	mCH341A_CMD_I2C_STM_STA		0x74
 #define	mCH341A_CMD_I2C_STM_STO		0x75
 #define	mCH341A_CMD_I2C_STM_OUT		0x80
-#define	mCH341A_CMD_I2C_STM_IN		0xC0  /* Unused on the source*/
+#define	mCH341A_CMD_I2C_STM_IN		0xC0
 #define	mCH341A_CMD_I2C_STM_MAX		( min( 0x3F, mCH341_PACKET_LENGTH ) )  /* Unused on the source*/
 #define	mCH341A_CMD_I2C_STM_SET		0x60
 #define	mCH341A_CMD_I2C_STM_US		0x40  /* Unused on the source*/
@@ -92,10 +94,12 @@
    Since is largely unused we can replace it*/
 
 
-#define CH341_I2C_LOW_SPEED 0               // low speed - 20kHz               
+#define CH341_I2C_LOW_SPEED 0               // low speed - 20kHz
 #define CH341_I2C_STANDARD_SPEED 1          // standard speed - 100kHz
 #define CH341_I2C_FAST_SPEED 2              // fast speed - 400kHz
 #define CH341_I2C_HIGH_SPEED 3              // high speed - 750kHz
+
+#define CH341_EEPROM_READ_CMD_SZ 0x65 /* Same size for all 24cXX read setup and next packets*/
 
 /* CH341a READ EEPROM setup packet for the 24c01
    this needs putting into a struct to allow convenient access to individual elements*/
@@ -115,7 +119,7 @@
 0070  d9 8b 41 7e 00 d0 fd 7f  f0 f1 12 00 5a 88 41 7e   ..A~.... ....Z.A~
 0080  aa e0 00 00 2a 88 41 7e  06 04 00 00 11 4d 40 77   ....*.A~ .....M@w
 0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
-00a0  aa df c0 75 00                                     ...u. 
+00a0  aa df c0 75 00                                     ...u.
 */
 
 /* CH341a READ EEPROM next packet for 24c01  (no packets!!!)*/
@@ -139,7 +143,7 @@
 0070  d9 8b 41 7e 00 f0 fd 7f  f0 f1 12 00 5a 88 41 7e   ..A~.... ....Z.A~
 0080  aa e0 00 00 2a 88 41 7e  06 04 00 00 11 4d 40 77   ....*.A~ .....M@w
 0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
-00a0  aa df c0 75 00                                     ...u. 
+00a0  aa df c0 75 00                                     ...u.
 */
 
 /* CH341a READ EEPROM next packet for 24c02  (one packet)*/
@@ -159,7 +163,7 @@
 0070  8f 04 44 7e 30 88 41 7e  ff ff ff ff 2a 88 41 7e   ..D~0.A~ ....*.A~
 0080  aa e0 00 7e 00 00 00 00  69 0e 3c 00 e4 00 18 00   ...~.... i.<.....
 0090  0f 00 00 00 00 00 00 00  00 00 00 00 8c e8 67 00   ........ ......g.
-00a0  aa df c0 75 00                                     ...u.   
+00a0  aa df c0 75 00                                     ...u.
 */
 
 
@@ -201,7 +205,7 @@
 0070  8f 04 44 7e 30 88 41 7e  ff ff ff ff 2a 88 41 7e   ..D~0.A~ ....*.A~
 0080  aa e0 00 7e 00 00 00 00  69 0e 3c 00 de 00 16 00   ...~.... i.<.....
 0090  0f 00 00 00 00 00 00 00  00 00 00 00 8c e8 67 00   ........ ......g.
-00a0  aa df c0 75 00                                     ...u.  
+00a0  aa df c0 75 00                                     ...u.
 */
 
 
@@ -223,7 +227,7 @@
 0070  d9 8b 41 7e 00 d0 fd 7f  f0 f1 12 00 5a 88 41 7e   ..A~.... ....Z.A~
 0080  aa e0 00 00 2a 88 41 7e  06 04 00 00 11 4d 40 77   ....*.A~ .....M@w
 0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
-00a0  aa df c0 75 00                                     ...u. 
+00a0  aa df c0 75 00                                     ...u.
 */
 
 /* CH341a READ EEPROM next packet for 24c08  (seven packets)*/
@@ -235,7 +239,7 @@
                                          "\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x8c\xe8\x67\x00" \
                                          "\xaa\xdf\xc0\x75\x00"
 /*please see file /wiresharkusbsniffing/sniffed.txt
-  this is the first read next packet for 24c08  (seven different packets)  
+  this is the first read next packet for 24c08  (seven different packets)
 
 0040  aa 74 82 a0 80 74 81 a1  e0 00 00 00 10 00 00 00   .t...t.. ........
 0050  00 00 00 00 8c f1 12 00  01 00 00 00 00 00 00 00   ........ ........
@@ -243,7 +247,7 @@
 0070  8f 04 44 7e 30 88 41 7e  ff ff ff ff 2a 88 41 7e   ..D~0.A~ ....*.A~
 0080  aa e0 00 7e 00 00 00 00  69 0e 3c 00 00 01 1a 00   ...~.... i.<.....
 0090  0f 00 00 00 00 00 00 00  00 00 00 00 8c e8 67 00   ........ ......g.
-00a0  aa df c0 75 00                                     ...u. 
+00a0  aa df c0 75 00                                     ...u.
 */
 
 
@@ -277,7 +281,7 @@
                                          "\x0f\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x8c\xe8\x67\x00" \
                                          "\xaa\xdf\xc0\x75\x00"
 /*please see file /wiresharkusbsniffing/sniffed.txt
-  this is the first read next packet for 24c16  (fifteen different packets)  
+  this is the first read next packet for 24c16  (fifteen different packets)
 
 0040  aa 74 82 a0 80 74 81 a1  e0 00 00 00 10 00 00 00   .t...t.. ........
 0050  00 00 00 00 8c f1 12 00  01 00 00 00 00 00 00 00   ........ ........
@@ -285,7 +289,7 @@
 0070  8f 04 44 7e 30 88 41 7e  ff ff ff ff 2a 88 41 7e   ..D~0.A~ ....*.A~
 0080  aa e0 00 7e 00 00 00 00  69 0e 3c 00 fa 00 31 00   ...~.... i.<...1.
 0090  0f 00 00 00 00 00 00 00  00 00 00 00 8c e8 67 00   ........ ......g.
-00a0  aa df c0 75 00                                     ...u.   
+00a0  aa df c0 75 00                                     ...u.
 */
 
 
@@ -297,7 +301,7 @@
                                           "\xd9\x8b\x41\x7e\x00\xf0\xfd\x7f\xf0\xf1\x12\x00\x5a\x88\x41\x7e" \
                                           "\xaa\xe0\x00\x00\x2a\x88\x41\x7e\x06\x04\x00\x00\x11\x4d\x40\x77" \
                                           "\xe8\xf3\x12\x00\x14\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00" \
-                                          "\xaa\xdf\xc0\x75\x00" 
+                                          "\xaa\xdf\xc0\x75\x00"
 /* please se file /wiresharkusbsniffing/sniffed.txt
    this is the read setup packet for 24c64
 
@@ -307,7 +311,7 @@
 0070  d9 8b 41 7e 00 e0 fd 7f  f0 f1 12 00 5a 88 41 7e   ..A~.... ....Z.A~
 0080  aa e0 00 00 2a 88 41 7e  06 04 00 00 11 4d 40 77   ....*.A~ .....M@w
 0090  e8 f3 12 00 14 00 00 00  01 00 00 00 00 00 00 00   ........ ........
-00a0  aa df c0 75 00                                       ...u.  
+00a0  aa df c0 75 00                                       ...u.
 */
 
 /* CH341a READ EEPROM next packet for 24c64  (63 packets)*/
@@ -329,38 +333,6 @@
 0090  0f 00 00 00 00 00 00 00  00 00 00 00 8c e8 67 00   ........ ......g.
 00a0  aa df c0 75 00                                     ...u.
 */
-
-#define CH341_EEPROM_READ_CMD_SZ 0x65 /* Same size for all 24cXX read setup and next packets*/
-
-// for 24c02
-#define CH341_EEPROM1_READ_SETUP_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1" \
-                                     "\xe0\x00\x12\x00\xc3\xef\x3d\x77" \
-                                     "\x2a\xf0\x3d\x77\x28\x00\x00\x00" \
-                                     "\x41\x7c\x43\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x65\x41\x40\x00" \
-                                     "\x00\x00\x00\x00\x00\x00\x00\x00" \
-                                     "\x80\x07\x00\x00\x28\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x00\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xee\x00\x01\x00\x00\x00\x00\x00" \
-                                     "\x53\x00\x01\x01\x00\x00\x00\x00" \
-                                     "\xaa\xdf\xc0\x75\x00"
-
-#define CH341_EEPROM1_READ_NEXT_CMD "\xaa\x74\x82\xa0\x00\x74\x81\xa1" \
-                                     "\xe0\x00\x12\x00\xc3\xef\x3d\x77" \
-                                     "\x2a\xf0\x3d\x77\x28\x00\x00\x00" \
-                                     "\x41\x7c\x43\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x65\x41\x40\x00" \
-                                     "\x00\x00\x00\x00\x00\x00\x00\x00" \
-                                     "\x80\x07\x00\x00\x28\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xaa\xe0\x00\x00\x00\x00\x00\x00" \
-                                     "\x01\x00\x00\x00\x01\x00\x00\x00" \
-                                     "\xee\x00\x01\x00\x00\x00\x00\x00" \
-                                     "\x53\x00\x01\x01\x00\x00\x00\x00" \
-                                     "\xaa\xdf\xc0\x75\x00"
-
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
