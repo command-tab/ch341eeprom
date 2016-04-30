@@ -69,7 +69,7 @@ If not, see <http://www.gnu.org/licenses/>.
 **Tested**
 
 | Name              | Write | Read |
-+-------------------+-------+------+
+|-------------------|-------|------|
 | CAT24M01WI        |  OK   |  OK  |
 | AT24C256          |  OK   |  OK  |
 | Microchip 24LC256 |  OK   |  OK  |
