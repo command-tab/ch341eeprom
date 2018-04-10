@@ -57,7 +57,13 @@ struct libusb_device_handle *ch341configure(uint16_t vid, uint16_t pid) {
         return NULL;
     }
 
-    libusb_set_debug(NULL, 3);                  // maximum debug logging level
+    
+
+    #if LIBUSBX_API_VERSION < 0x01000106
+        libusb_set_debug(NULL, 3);                  // maximum debug logging level
+    #else
+        libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, 3);
+    #endif
 
     fprintf(verbout, "Searching USB buses for WCH CH341a i2c EEPROM programmer [%04x:%04x]\n", 
             USB_LOCK_VENDOR, USB_LOCK_PRODUCT);
