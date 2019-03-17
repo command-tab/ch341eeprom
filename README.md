@@ -64,3 +64,15 @@ See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program.
 If not, see <http://www.gnu.org/licenses/>.
+
+
+**Tested**
+
+| Name              | Write | Read |
+|-------------------|-------|------|
+| CAT24M01WI        |  OK   |  OK  |
+| AT24C256          |  OK   |  OK  |
+| Microchip 24LC256 |  OK   |  OK  |
+| AT24C32N          |  OK   |  OK  |
+| AT24C08           |  OK   |  OK  |
+

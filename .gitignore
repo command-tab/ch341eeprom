@@ -11,6 +11,8 @@ build/
 profile
 .idea/
 
+*.bin
+
 # Ignore user-specific Xcode settings
 *.pbxuser
 *.mode1v3
@@ -25,3 +27,9 @@ profile
 
 # Ignore Xcode 4 semi-personal settings, often included in workspaces
 xcuserdata
+
+# Vim
+
+.*.swp
+tags
+
