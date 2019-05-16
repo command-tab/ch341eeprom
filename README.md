@@ -28,6 +28,7 @@ Usage:
  -v, --verbose          verbose output
  -d, --debug            debug output
  -s, --size             size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}
+ -p, --speed            i2c speed (low|fast|high) if different than standard which is default
  -e, --erase            erase EEPROM (fill with 0xff)
  -w, --write <filename> write EEPROM with image from filename
  -r, --read  <filename> read EEPROM and save image to filename

@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
     uint8_t debug = FALSE, verbose = FALSE;
     struct libusb_device_handle *devHandle = NULL;
     char *filename = NULL, eepromname[12], operation = 0;
+    uint32_t speed = CH341_I2C_STANDARD_SPEED;
     FILE *fp;
 
     struct EEPROM eeprom_info;
@@ -54,6 +55,7 @@ int main(int argc, char **argv) {
         " -v, --verbose          verbose output\n" \
         " -d, --debug            debug output\n" \
         " -s, --size             size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}\n" \
+        " -p, --speed            i2c speed (low|fast|high) if different than standard which is default\n" \
         " -e, --erase            erase EEPROM (fill with 0xff)\n" \
         " -w, --write <filename> write EEPROM with image from filename\n" \
         " -r, --read  <filename> read EEPROM and save image to filename\n\n" \
@@ -65,14 +67,17 @@ int main(int argc, char **argv) {
         {"debug",   no_argument,       0, 'd'},
         {"erase",   no_argument,       0, 'e'},
         {"size",    required_argument, 0, 's'},
+        {"speed",   required_argument, 0, 'p'},
         {"read",    required_argument, 0, 'r'},
         {"write",   required_argument, 0, 'w'},
         {0, 0, 0, 0}
     };
 
+    static int speed_table[] = {20, 100, 400, 750};
+
     while (TRUE) {
         int32_t optidx = 0;
-        int8_t c = getopt_long(argc,argv,"hvdes:w:r:", longopts, &optidx);
+        int8_t c = getopt_long(argc,argv,"hvdes:p:w:r:", longopts, &optidx);
         if (c == -1)
             break;
 
@@ -85,6 +90,15 @@ int main(int argc, char **argv) {
                       break;
             case 's': if((eepromsize = parseEEPsize(optarg, &eeprom_info)) > 0)
                         strncpy(eepromname, optarg, 10);
+                      break;
+            case 'p': if(strstr(optarg, "low"))
+                        speed = CH341_I2C_LOW_SPEED;
+                      else if(strstr(optarg, "fast"))
+                        speed = CH341_I2C_FAST_SPEED;
+                      else if(strstr(optarg, "high"))
+                        speed = CH341_I2C_HIGH_SPEED;
+                      else
+                        speed = CH341_I2C_STANDARD_SPEED;
                       break;
             case 'e': if(!operation)
                         operation = 'e';
@@ -144,11 +158,11 @@ int main(int argc, char **argv) {
     }
     fprintf(verbout, "Configured USB device with vendor ID: %04x product ID: %04x\n", USB_LOCK_VENDOR, USB_LOCK_PRODUCT);
 
-    if(ch341setstream(devHandle, CH341_I2C_STANDARD_SPEED) < 0) {
+    if(ch341setstream(devHandle, speed) < 0) {
         fprintf(stderr, "Couldnt set i2c bus speed\n");
         goto shutdown;
     }
-    fprintf(verbout, "Set i2c bus speed to [100kHz]\n");
+    fprintf(verbout, "Set i2c bus speed to [%dkHz]\n", speed_table[speed]);
 
     switch(operation) {
         case 'r':   // read
