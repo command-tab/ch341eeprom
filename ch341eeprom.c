@@ -27,6 +27,7 @@
 #include <inttypes.h>
 #include <getopt.h>
 #include <limits.h>
+#include <sys/mman.h>
 #include "ch341eeprom.h"
 
 FILE *debugout, *verbout;
@@ -38,6 +39,8 @@ int main(int argc, char **argv) {
     struct libusb_device_handle *devHandle = NULL;
     char *filename = NULL, eepromname[12], operation = 0;
     uint32_t speed = CH341_I2C_STANDARD_SPEED;
+    uint8_t *verifybuf;
+    uint8_t verify_failed = FALSE;
     FILE *fp;
 
     struct EEPROM eeprom_info;
@@ -51,14 +54,15 @@ int main(int argc, char **argv) {
 
     static char usage_msg[] = 
         "Usage:\n" \
-        " -h, --help             display this text\n" \
-        " -v, --verbose          verbose output\n" \
-        " -d, --debug            debug output\n" \
-        " -s, --size             size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}\n" \
-        " -p, --speed            i2c speed (low|fast|high) if different than standard which is default\n" \
-        " -e, --erase            erase EEPROM (fill with 0xff)\n" \
-        " -w, --write <filename> write EEPROM with image from filename\n" \
-        " -r, --read  <filename> read EEPROM and save image to filename\n\n" \
+        " -h, --help              display this text\n" \
+        " -v, --verbose           verbose output\n" \
+        " -d, --debug             debug output\n" \
+        " -s, --size              size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}\n" \
+        " -e, --erase             erase EEPROM (fill with 0xff)\n" \
+        " -p, --speed             i2c speed (low|fast|high) if different than standard which is default\n" \
+        " -w, --write  <filename> write EEPROM with image from filename\n" \
+        " -r, --read   <filename> read EEPROM and save image to filename\n" \
+        " -V, --verify <filename> verify EEPROM contents against image in filename\n\n" \
         "Example: ch341eeprom -v -s 24c64 -w bootrom.bin\n";
 
     static struct option longopts[] = {
@@ -70,6 +74,7 @@ int main(int argc, char **argv) {
         {"speed",   required_argument, 0, 'p'},
         {"read",    required_argument, 0, 'r'},
         {"write",   required_argument, 0, 'w'},
+        {"verify",  required_argument, 0, 'V'},
         {0, 0, 0, 0}
     };
 
@@ -77,7 +82,7 @@ int main(int argc, char **argv) {
 
     while (TRUE) {
         int32_t optidx = 0;
-        int8_t c = getopt_long(argc,argv,"hvdes:p:w:r:", longopts, &optidx);
+        int8_t c = getopt_long(argc,argv,"hvdes:p:w:r:V:", longopts, &optidx);
         if (c == -1)
             break;
 
@@ -124,6 +129,15 @@ int main(int argc, char **argv) {
                         fprintf(stderr, "Conflicting command line options\n");
                         goto shutdown;
                       }  
+                      break;
+            case 'V': if(!operation) {
+                        operation = 'V';
+                        filename = (char *) malloc(strlen(optarg)+1);
+                        strcpy(filename, optarg);
+                      } else {
+                        fprintf(stderr, "Conflicting command line options\n");
+                        goto shutdown;
+                      }
                       break;
             default :  
             case '?': fprintf(stdout, "%s", version_msg);
@@ -194,6 +208,48 @@ int main(int argc, char **argv) {
             }
             fclose(fp);
             fprintf(stdout, "Wrote [%d] bytes to file [%s]\n", eepromsize, filename);
+            break;
+        case 'V':   // verify
+            memset(readbuf, 0xff, MAX_EEPROM_SIZE);
+
+            if(ch341readEEPROM(devHandle, readbuf, eepromsize, &eeprom_info) < 0) {
+                fprintf(stderr, "Couldnt read [%d] bytes from [%s] EEPROM\n", eepromsize, eepromname);
+                goto shutdown;
+            }
+            fprintf(stdout, "Read [%d] bytes from [%s] EEPROM\n", eepromsize, eepromname);
+            for(i=0;i<eepromsize;i++) {
+                if(!(i%16))
+                    fprintf(debugout, "\n%04x: ", i);
+                fprintf(debugout, "%02x ", readbuf[i]);
+            }
+            fprintf(debugout, "\n");
+
+            if(!(fp=fopen(filename, "rb"))) {
+                fprintf(stderr, "Couldnt open file [%s] for reading\n", filename);
+                goto shutdown;
+            }
+
+            verifybuf = mmap(NULL, eepromsize, PROT_READ, MAP_PRIVATE, fileno(fp), 0);
+            if(!verifybuf) {
+                fprintf(stderr, "Error mapping file [%s]\n", filename);
+                if(fp)
+                    fclose(fp);
+                goto shutdown;
+            }
+
+	    for(i=0;i<eepromsize;i++) {
+                if(readbuf[i]!=verifybuf[i]) {
+                    verify_failed = TRUE;
+                    break;
+                }
+            }
+            if(verify_failed)
+                fprintf(stdout, "Verification against file [%s] failed at offset [%d], EEPROM: %02hhX, file: %02hhX\n", filename, i, readbuf[i], verifybuf[i]);
+            else
+                fprintf(stdout, "Verified [%d] bytes against file [%s]\n", eepromsize, filename);
+
+            munmap(verifybuf, eepromsize);
+            fclose(fp);
             break;
         case 'w':   // write
             if(!(fp=fopen(filename, "rb"))) {
