@@ -52,7 +52,7 @@ Closed USB device
 
 **Author**
 
-Originally written by [asbokid](http://sourceforge.net/projects/ch341eepromtool/) and released under the terms of the GNU GPL, version 3, or later. Modifications by [commandtab](https://github.com/commandtab) to make it work under OS X.
+Originally written by [asbokid](http://sourceforge.net/projects/ch341eepromtool/) and released under the terms of the GNU GPL, version 3, or later. Modifications by [command-tab](https://github.com/command-tab) to make it work under OS X.
 
 **License**
 
