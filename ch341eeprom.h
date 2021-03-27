@@ -363,6 +363,7 @@ const static struct EEPROM eepromlist[] = {
   { 0, 0, 0, 0 }
 };
 
+extern uint8_t *readbuf;
 
 int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buf, uint32_t bytes, struct EEPROM* eeprom_info);
 int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buf, uint32_t bytes, struct EEPROM* eeprom_info);

@@ -31,7 +31,6 @@ extern FILE *debugout, *verbout;
 uint32_t getnextpkt;                            // set by the callback function
 uint32_t syncackpkt;                            // synch / ack flag used by BULK OUT cb function
 uint32_t byteoffset;
-uint8_t *readbuf;
 
 // --------------------------------------------------------------------------
 // ch341configure()
@@ -58,7 +57,7 @@ struct libusb_device_handle *ch341configure(uint16_t vid, uint16_t pid) {
         return NULL;
     }
 
-    
+
 
     #if LIBUSBX_API_VERSION < 0x01000106
         libusb_set_debug(NULL, 3);                  // maximum debug logging level
