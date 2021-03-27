@@ -168,7 +168,7 @@ void ch341ReadCmdMarshall(uint8_t *buffer, uint32_t addr, struct EEPROM *eeprom_
     *ptr++ = mCH341A_CMD_I2C_STREAM; // 0
     *ptr++ = mCH341A_CMD_I2C_STM_STA; // 1
     // Write address
-    *ptr++ = mCH341A_CMD_I2C_STM_OUT | (*eeprom_info).addr_size+1; // 2: I2C bus adddress + EEPROM address
+    *ptr++ = mCH341A_CMD_I2C_STM_OUT | ((*eeprom_info).addr_size+1); // 2: I2C bus adddress + EEPROM address
     uint8_t msb_addr;
     if ((*eeprom_info).addr_size >= 2) {
         // 24C32 and more
@@ -300,7 +300,6 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
         }
 	}
 
-out_deinit:
     libusb_free_transfer(xferBulkIn);
     libusb_free_transfer(xferBulkOut);
     return 0;

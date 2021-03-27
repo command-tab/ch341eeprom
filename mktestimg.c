@@ -25,6 +25,7 @@
 
 int main(int argc, char **argv)
 {
+    int ret;
 
     FILE *out=fopen( "test.bin", "w" );
     /*create and open file test.bin*/
@@ -36,7 +37,9 @@ int main(int argc, char **argv)
     printf("Select chip type:\n\na for 24c01\nb for 24c02\nc for 24c04\nd for 24c08\n"\
            "e for 24c16\nf for 24c32\ng for 24c64\nh for 24c128\ni for 24c256\n"\
            "l for 24c512\nm for 24c1024\n\nInsert a letter:");
-    scanf("%c",&chip);
+    ret = scanf("%c",&chip);
+    if (ret != 1)
+	return 1;
     getchar();
 
     switch(chip) {	/* switch cycle*/
@@ -87,6 +90,7 @@ int main(int argc, char **argv)
 
         default:
 	printf("Error, wrong letter\n");   /* in the other case*/
+	return 1;
 	break;
                  }
 
@@ -98,7 +102,7 @@ int main(int argc, char **argv)
             /* create a binary file with 'rolling'*/
 		}
 	}
-	
+
         fflush(out);
         fclose(out);
         /* clean and close file test.bin*/
@@ -107,4 +111,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
