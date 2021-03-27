@@ -410,7 +410,7 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
 
         outptr    = ch341outBuffer;
         *outptr++ = mCH341A_CMD_I2C_STREAM;
-        *outptr++ = 0x5a;                           // what is this 0x5a??
+        *outptr++ = mCH341A_CMD_I2C_STM_MS | 10; // Wait 10ms (?)
         *outptr++ = mCH341A_CMD_I2C_STM_END;
 
         ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, ch341outBuffer, 3, &actuallen, DEFAULT_TIMEOUT);
