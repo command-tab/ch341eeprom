@@ -1,6 +1,9 @@
+CC = clang
+CFLAGS = -Wall -O2
+
 default:
-	clang -o ch341eeprom ch341eeprom.c ch341funcs.c -lusb-1.0
-	clang -o mktestimg mktestimg.c
+	$(CC) $(CFLAGS) -o ch341eeprom ch341eeprom.c ch341funcs.c -lusb-1.0
+	$(CC) $(CFLAGS) -o mktestimg mktestimg.c
 
 clean:
 	rm -f ch341eeprom mktestimg
@@ -92,4 +95,3 @@ test1024: default
 	cmp tmp_random.bin tmp_random_readed.bin
 	rm -f tmp_random.bin tmp_random_readed.bin
 	echo "Test 1024Kbit/128Kbyte EEPROM done"
-
