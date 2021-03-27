@@ -162,9 +162,10 @@ int32_t ch341setstream(struct libusb_device_handle *devHandle, uint32_t speed) {
     return 0;
 }
 
-void ch341ReadCmdMarshall(uint8_t *buffer, uint32_t addr, struct EEPROM *eeprom_info) {
+size_t ch341ReadCmdMarshall(uint8_t *buffer, uint32_t addr, struct EEPROM *eeprom_info) {
     uint8_t *ptr = buffer;
 
+    // Frame 1. Program data address, and read 32 bytes.
     *ptr++ = mCH341A_CMD_I2C_STREAM; // 0
     *ptr++ = mCH341A_CMD_I2C_STM_STA; // 1
     // Write address
@@ -182,41 +183,35 @@ void ch341ReadCmdMarshall(uint8_t *buffer, uint32_t addr, struct EEPROM *eeprom_
         *ptr++ = (EEPROM_I2C_BUS_ADDRESS | msb_addr)<<1; // 3
         *ptr++ = (addr>>0 & 0xFF); // 4
     }
-    // Read
     *ptr++ = mCH341A_CMD_I2C_STM_STA; // 6/5
     *ptr++ = mCH341A_CMD_I2C_STM_OUT | 1; // 7/6
     *ptr++ = (EEPROM_I2C_BUS_ADDRESS | msb_addr)<<1 | 1; // 8/7: Read command
 
-    // Configuration?
-    *ptr++ = 0xE0; // 9/8
-    *ptr++ = 0x00; // 10/9
-    if ((*eeprom_info).addr_size < 2) *ptr++ = 0x10; // x/10
-    memcpy(ptr, "\x00\x06\x04\x00\x00\x00\x00\x00\x00", 9); ptr += 9; // 10
-    uint32_t size_kb = (*eeprom_info).size/1024;
-    *ptr++ = size_kb & 0xFF; // 19
-    *ptr++ = (size_kb >> 8) & 0xFF; // 20
-    memcpy(ptr, "\x00\x00\x11\x4d\x40\x77\xcd\xab\xba\xdc", 10); ptr += 10;
+    // Read 32 bytes
+    *ptr++ = mCH341A_CMD_I2C_STM_IN | 32; // 9/8
+    *ptr++ = mCH341A_CMD_I2C_STM_END; // 10/9
 
-    // Frame 2
+    // Frame 2 - read 32 bytes
+    ptr = &buffer[32];
     *ptr++ = mCH341A_CMD_I2C_STREAM;
-    memcpy(ptr, "\xe0\x00\x00\xc4\xf1\x12\x00\x11\x4d\x40\x77\xf0\xf1\x12\x00" \
-                "\xd9\x8b\x41\x7e\x00\xe0\xfd\x7f\xf0\xf1\x12\x00\x5a\x88\x41\x7e", 31);
-    ptr += 31;
+    *ptr++ = mCH341A_CMD_I2C_STM_IN | 32;
+    *ptr++ = mCH341A_CMD_I2C_STM_END;
 
-    // Frame 3
+    // Frame 3 - read 32 bytes
+    ptr = &buffer[64];
     *ptr++ = mCH341A_CMD_I2C_STREAM;
-    memcpy(ptr, "\xe0\x00\x00\x2a\x88\x41\x7e\x06\x04\x00\x00\x11\x4d\x40\x77" \
-                "\xe8\xf3\x12\x00\x14\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x00", 31);
-    ptr += 31;
+    *ptr++ = mCH341A_CMD_I2C_STM_IN | 32;
+    *ptr++ = mCH341A_CMD_I2C_STM_END;
 
-    // Finalize
-    *ptr++ = mCH341A_CMD_I2C_STREAM; // 0xAA
-    *ptr++ = 0xDF; // ???
-    *ptr++ = mCH341A_CMD_I2C_STM_IN; // 0xC0
-    *ptr++ = mCH341A_CMD_I2C_STM_STO; // 0x75
-    *ptr++ = mCH341A_CMD_I2C_STM_END; // 0x00
+    // Finalize - read last 32 bytes
+    ptr = &buffer[96];
+    *ptr++ = mCH341A_CMD_I2C_STREAM;
+    *ptr++ = mCH341A_CMD_I2C_STM_IN | 31;
+    *ptr++ = mCH341A_CMD_I2C_STM_IN;
+    *ptr++ = mCH341A_CMD_I2C_STM_STO;
+    *ptr++ = mCH341A_CMD_I2C_STM_END;
 
-    assert(ptr - buffer == CH341_EEPROM_READ_CMD_SZ);
+    return ptr - buffer;
 }
 
 // --------------------------------------------------------------------------
@@ -229,6 +224,7 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
     int32_t ret = 0, readpktcount = 0;
     struct libusb_transfer *xferBulkIn, *xferBulkOut;
     struct timeval tv = {0, 100};                   // our async polling interval
+    size_t xfer_size;
 
     xferBulkIn  = libusb_alloc_transfer(0);
     xferBulkOut = libusb_alloc_transfer(0);
@@ -243,13 +239,13 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer,
     fprintf(debugout, "Allocated USB transfer structures\n");
 
     memset(ch341inBuffer, 0, EEPROM_READ_BULKIN_BUF_SZ);
-    ch341ReadCmdMarshall(ch341outBuffer, 0, eeprom_info); // Fill output buffer
+    xfer_size = ch341ReadCmdMarshall(ch341outBuffer, 0, eeprom_info); // Fill output buffer
 
     libusb_fill_bulk_transfer(xferBulkIn,  devHandle, BULK_READ_ENDPOINT, ch341inBuffer,
         EEPROM_READ_BULKIN_BUF_SZ, cbBulkIn, NULL, DEFAULT_TIMEOUT);
 
     libusb_fill_bulk_transfer(xferBulkOut, devHandle, BULK_WRITE_ENDPOINT,
-        ch341outBuffer, EEPROM_READ_BULKOUT_BUF_SZ, cbBulkOut, NULL, DEFAULT_TIMEOUT);
+        ch341outBuffer, xfer_size, cbBulkOut, NULL, DEFAULT_TIMEOUT);
 
     fprintf(debugout, "Filled USB transfer structures\n");
 
