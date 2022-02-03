@@ -1,0 +1,14 @@
+Source: ch341eeprom
+Section: universe/electronics
+Priority: optional
+Maintainer: Evgeny S Maksimov <admin@vragam.net>
+Build-Depends: debhelper-compat (= 11), libusb-1.0-0-dev, clang
+Standards-Version: 4.5.1
+Vcs-Browser: https://github.com/command-tab/ch341eeprom
+Vcs-Git: https://github.com/command-tab/ch341eeprom.git
+Rules-Requires-Root: no
+
+Package: ch341eeprom
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: A libusb based programming tool for 24Cxx EEPROMs using the CH341A I2C

@@ -1,0 +1,2 @@
+ch341eeprom usr/bin
+99-CH341.rules etc/udev/rules.d
