@@ -135,17 +135,16 @@ int32_t ch341setstream(struct libusb_device_handle *devHandle, uint32_t speed)
 
     i2c_dev.obuf[0] = mCH341A_CMD_I2C_STREAM;
     i2c_dev.obuf[1] = mCH341A_CMD_I2C_STM_SET | (speed & 0x3);
-    i2c_dev.obuf[2] = mCH341A_CMD_I2C_STM_END;
 
-    int ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, 3, &actuallen, DEFAULT_TIMEOUT);
+    int ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, 2, &actuallen, DEFAULT_TIMEOUT);
 
     if (ret < 0) {
-        fprintf(stderr, "ch341setstream(): Failed write %d bytes '%s'\n", 3, strerror(-ret));
+        fprintf(stderr, "ch341setstream(): Failed write %d bytes '%s'\n", 2, strerror(-ret));
         return -1;
     }
 
-    fprintf(debugout, "ch341setstream(): Wrote %d bytes: ", 3);
-    for (unsigned i = 0; i < 3; ++i)
+    fprintf(debugout, "ch341setstream(): Wrote 2 bytes: ");
+    for (unsigned i = 0; i < 2; ++i)
         fprintf(debugout, "%02x ", i2c_dev.obuf[i]);
     fprintf(debugout, "\n");
     return 0;
@@ -168,12 +167,11 @@ int ch341_i2c_read(struct libusb_device_handle *devHandle, struct i2c_msg *msg)
         }
         *ptr++ = mCH341A_CMD_I2C_STM_IN;
         *ptr++ = mCH341A_CMD_I2C_STM_STO;
-        *ptr++ = mCH341A_CMD_I2C_STM_END;
 
         int actuallen = 0;
         int ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, ptr - i2c_dev.obuf, &actuallen, DEFAULT_TIMEOUT);
         if (ret < 0) {
-            fprintf(stderr, "USB read error : %s\n", strerror(-ret));
+            fprintf(stderr, "USB write error : %s\n", strerror(-ret));
             return ret;
         }
         ret = libusb_bulk_transfer(devHandle, BULK_READ_ENDPOINT, i2c_dev.ibuf, bytestoread, &actuallen, DEFAULT_TIMEOUT);
@@ -204,11 +202,8 @@ int ch341_i2c_write(struct libusb_device_handle *devHandle, struct i2c_msg *msg)
         uint8_t *lenptr = outptr++;
         if (first) {
             *outptr++ = msg->addr << 1;
-            if (left == 0) {
-                *outptr++ = mCH341A_CMD_I2C_STM_IN;
-            }
         }
-        unsigned avail = 32 - (outptr - i2c_dev.obuf) - 1;
+        unsigned avail = 32 - (outptr - i2c_dev.obuf);
         unsigned wlen = avail;
         if (left < avail) {
             wlen = left;
@@ -219,12 +214,11 @@ int ch341_i2c_write(struct libusb_device_handle *devHandle, struct i2c_msg *msg)
         outptr += wlen;
         ptr += wlen;
         left -= wlen;
-        wlen = outptr - lenptr;
+        wlen = outptr - lenptr - 1;
         *lenptr = mCH341A_CMD_I2C_STM_OUT | wlen;
         if (left == 0) {  // Stop packet
             *outptr++ = mCH341A_CMD_I2C_STM_STO;
         }
-        *outptr++ = mCH341A_CMD_I2C_STM_END;
 
         wlen = outptr - i2c_dev.obuf;
         assert(wlen <= 32);
@@ -237,7 +231,7 @@ int ch341_i2c_write(struct libusb_device_handle *devHandle, struct i2c_msg *msg)
 
         first = false;
         int actuallen = 0, ret = 0;
-        //ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, wlen, &actuallen, DEFAULT_TIMEOUT);
+        ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, wlen, &actuallen, DEFAULT_TIMEOUT);
 
         if (ret < 0) {
             fprintf(stderr, "Failed to write to I2C: '%s'\n", strerror(-ret));
@@ -248,7 +242,7 @@ int ch341_i2c_write(struct libusb_device_handle *devHandle, struct i2c_msg *msg)
     return 0;
 }
 
-int ch341_i2x_xfer(struct libusb_device_handle *devHandle, struct i2c_msg *msg, unsigned num) {
+int ch341_i2c_xfer(struct libusb_device_handle *devHandle, struct i2c_msg *msg, unsigned num) {
     for (unsigned i = 0; i < num; ++i) {
         if (msg[i].flags & I2C_M_RD) {
             int ret = ch341_i2c_read(devHandle, &msg[i]);
@@ -273,25 +267,51 @@ int ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer, uin
     msg[0].flags = 0;
     msg[0].addr = EEPROM_I2C_BUS_ADDRESS;
     msg[0].buf = out;
+
     msg[1].flags = I2C_M_RD;
     msg[1].buf = buffer;
     msg[1].addr = EEPROM_I2C_BUS_ADDRESS;
-    msg[1].len = bytestoread; //
+    msg[1].len = bytestoread;
 
-    //msg[1].len = bytestoread;
-
-    return ch341_i2x_xfer(devHandle, msg, 2);
+    return ch341_i2c_xfer(devHandle, msg, 2);
 }
 
 int ch341delay_ms(struct libusb_device_handle *devHandle, unsigned ms) {
-    fprintf(debugout, "Writing [aa 5a 00] to EEPROM\n");
     i2c_dev.obuf[0] = mCH341A_CMD_I2C_STREAM;
-    i2c_dev.obuf[1] = mCH341A_CMD_I2C_STM_MS | (ms & 0xf);        // Wait 10ms (?)
-    i2c_dev.obuf[2] = mCH341A_CMD_I2C_STM_END;
+    i2c_dev.obuf[1] = mCH341A_CMD_I2C_STM_MS | (ms & 0xf);        // Wait up to 15ms
     int actuallen = 0;
-    return libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, 3, &actuallen, DEFAULT_TIMEOUT);
+    return libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, 2, &actuallen, DEFAULT_TIMEOUT);
 }
 
+int ch341_quick_write(struct libusb_device_handle *devHandle, uint8_t addr) {
+    unsigned olen = 0;
+    i2c_dev.obuf[olen++] = mCH341A_CMD_I2C_STREAM;
+    i2c_dev.obuf[olen++] = mCH341A_CMD_I2C_STM_STA;
+    i2c_dev.obuf[olen++] = mCH341A_CMD_I2C_STM_OUT;
+#if 0
+    i2c_dev.obuf[olen++] = addr << 1 | 1; // READ1
+    i2c_dev.obuf[olen++] = mCH341A_CMD_I2C_STM_IN;
+#else
+    i2c_dev.obuf[olen++] = addr << 1; // WRITE
+#endif
+    i2c_dev.obuf[olen++] = mCH341A_CMD_I2C_STM_STO;
+    int actuallen = 0;
+    int ret = libusb_bulk_transfer(devHandle, BULK_WRITE_ENDPOINT, i2c_dev.obuf, olen, &actuallen, DEFAULT_TIMEOUT);
+    if (ret < 0) {
+        fprintf(stderr, "USB write error : %s\n", strerror(-ret));
+        return ret;
+    }
+    ret = libusb_bulk_transfer(devHandle, BULK_READ_ENDPOINT, i2c_dev.ibuf, 32, &actuallen, DEFAULT_TIMEOUT);
+    if (ret < 0) {
+        fprintf(stderr, "USB read error : %s\n", strerror(-ret));
+        return ret;
+    }
+    for (unsigned i = 0; i < actuallen; ++i) {
+        fprintf(debugout, "%02x ", i2c_dev.ibuf[i]);
+    }
+    fprintf(debugout, "0x%02x: %s\n", addr, (i2c_dev.ibuf[0] & 0x80) ? "NACK" : "ACK");
+    return 0;
+}
 // --------------------------------------------------------------------------
 // ch341writeEEPROM()
 //      write n bytes to 24c32/24c64 device (in packets of 32 bytes)
@@ -317,7 +337,7 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
         outptr += wlen;
         msg.len = outptr - msgbuffer;
         int ret = 0;
-        ret = ch341_i2x_xfer(devHandle, &msg, 1);
+        ret = ch341_i2c_xfer(devHandle, &msg, 1);
         if (ret < 0) {
             fprintf(stderr, "Failed to write to EEPROM: '%s'\n", strerror(-ret));
             return -1;

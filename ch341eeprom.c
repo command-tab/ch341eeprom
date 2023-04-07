@@ -79,6 +79,7 @@ int main(int argc, char **argv)
         { "read", required_argument, 0, 'r' },
         { "write", required_argument, 0, 'w' },
         { "verify", required_argument, 0, 'V' },
+        { "scan", no_argument, 0, 'x' },
         { 0, 0, 0, 0 }
     };
 
@@ -86,7 +87,7 @@ int main(int argc, char **argv)
 
     while (true) {
         int32_t optidx = 0;
-        int8_t c = getopt_long(argc, argv, "hvdes:p:w:r:V:", longopts, &optidx);
+        int8_t c = getopt_long(argc, argv, "hvdexs:p:w:r:V:", longopts, &optidx);
         if (c == -1)
             break;
 
@@ -149,6 +150,15 @@ int main(int argc, char **argv)
                 return -1;
             }
             break;
+        case 'x':
+            if (!operation)
+                operation = 'x';
+            else {
+                fprintf(stderr, "Conflicting command line options\n");
+                return -1;
+            }
+            break;
+
         default:
         case '?':
             fprintf(stdout, "%s", version_msg);
@@ -166,7 +176,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    if (eepromsize <= 0) {
+    if (eepromsize <= 0 && operation != 'x') {
         fprintf(stderr, "Invalid EEPROM size\n");
         return -1;
     }
@@ -301,6 +311,12 @@ int main(int argc, char **argv)
         }
         fprintf(stdout, "Erased [%d] bytes of [%s] EEPROM\n", eepromsize, eepromname);
         break;
+    case 'x': {// scan
+        for (unsigned i = 0x8; i < 0x80; ++i) {
+            ch341_quick_write(devHandle, i);
+        }
+        break;
+    }
     default:
         fprintf(stderr, "Unknown option\n");
     }

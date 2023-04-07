@@ -147,4 +147,5 @@ int32_t ch341readEEPROM(struct libusb_device_handle *devHandle, uint8_t * buf, u
 int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t * buf, uint32_t bytes, const struct EEPROM *eeprom_info);
 struct libusb_device_handle *ch341configure(uint16_t vid, uint16_t pid);
 int32_t ch341setstream(struct libusb_device_handle *devHandle, uint32_t speed);
+int ch341_quick_write(struct libusb_device_handle *devHandle, uint8_t addr);
 int32_t parseEEPsize(char *eepromname, const struct EEPROM **eeprom);
