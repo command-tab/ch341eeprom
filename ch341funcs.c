@@ -174,7 +174,7 @@ int ch341_i2c_read(struct libusb_device_handle *devHandle, struct i2c_msg *msg)
             fprintf(stderr, "USB write error : %s\n", strerror(-ret));
             return ret;
         }
-        ret = libusb_bulk_transfer(devHandle, BULK_READ_ENDPOINT, i2c_dev.ibuf, bytestoread, &actuallen, DEFAULT_TIMEOUT);
+        ret = libusb_bulk_transfer(devHandle, BULK_READ_ENDPOINT, i2c_dev.ibuf, 32, &actuallen, DEFAULT_TIMEOUT);
         if (ret < 0) {
             fprintf(stderr, "USB read error : %s\n", strerror(-ret));
             return ret;
