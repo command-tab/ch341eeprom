@@ -1,7 +1,7 @@
-CC = clang
-CFLAGS = -Wall -O2
+CC = gcc
+CFLAGS = -Wall -g -O0
 
-default:
+all:
 	$(CC) $(CFLAGS) -o ch341eeprom ch341eeprom.c ch341funcs.c -lusb-1.0
 	$(CC) $(CFLAGS) -o mktestimg mktestimg.c
 
