@@ -170,16 +170,14 @@ size_t ch341ReadCmdMarshall(uint8_t *buffer, uint32_t addr, struct EEPROM *eepro
     *ptr++ = mCH341A_CMD_I2C_STM_STA; // 1
     // Write address
     *ptr++ = mCH341A_CMD_I2C_STM_OUT | ((*eeprom_info).addr_size+1); // 2: I2C bus adddress + EEPROM address
-    uint8_t msb_addr;
+    uint8_t msb_addr = eeprom_info->addr;
     if ((*eeprom_info).addr_size >= 2) {
         // 24C32 and more
-        msb_addr = addr>>16 & (*eeprom_info).i2c_addr_mask;
         *ptr++ = (EEPROM_I2C_BUS_ADDRESS | msb_addr)<<1; // 3
         *ptr++ = (addr>>8 & 0xFF); // 4
         *ptr++ = (addr>>0 & 0xFF); // 5
     } else {
         // 24C16 and less
-        msb_addr = addr>>8 & (*eeprom_info).i2c_addr_mask;
         *ptr++ = (EEPROM_I2C_BUS_ADDRESS | msb_addr)<<1; // 3
         *ptr++ = (addr>>0 & 0xFF); // 4
     }
@@ -354,10 +352,10 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
     while(bytes) {
         outptr = i2cCmdBuffer;
         if ((*eeprom_info).addr_size >= 2) {
-            *outptr++ = (uint8_t) (0xa0 | (byteoffset >> 16 & (*eeprom_info).i2c_addr_mask)<<1);  // EEPROM device address
+          *outptr++ = (uint8_t) (0xa0 | (eeprom_info->addr)<<1);  // EEPROM device address
             *outptr++ = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
         } else {
-            *outptr++ = (uint8_t) (0xa0 | (byteoffset >> 8 & (*eeprom_info).i2c_addr_mask)<<1);  // EEPROM device address
+          *outptr++ = (uint8_t) (0xa0 | (eeprom_info->addr)<<1);  // EEPROM device address
         }
         *outptr++ = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
