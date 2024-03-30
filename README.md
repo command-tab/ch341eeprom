@@ -3,6 +3,8 @@ ch341eeprom
 
 A libusb based programming tool for 24Cxx serial EEPROMs using the WinChipHead CH341A IC
 
+This fork adds the ability to specify the value of the part of the I2C address set by the chip select pins using the `--chip-select` argument.
+
 ![WinChipHead CH341A based programmer](https://raw.github.com/commandtab/ch341eeprom/master/pics/programmer.jpg)
 
 **Requirements**
