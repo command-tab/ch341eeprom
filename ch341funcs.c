@@ -170,14 +170,16 @@ size_t ch341ReadCmdMarshall(uint8_t *buffer, uint32_t addr, struct EEPROM *eepro
     *ptr++ = mCH341A_CMD_I2C_STM_STA; // 1
     // Write address
     *ptr++ = mCH341A_CMD_I2C_STM_OUT | ((*eeprom_info).addr_size+1); // 2: I2C bus adddress + EEPROM address
-    uint8_t msb_addr = eeprom_info->addr;
+    uint8_t msb_addr;
     if ((*eeprom_info).addr_size >= 2) {
         // 24C32 and more
+        msb_addr = (addr>>16 & 1) | eeprom_info->addr;
         *ptr++ = (EEPROM_I2C_BUS_ADDRESS | msb_addr)<<1; // 3
         *ptr++ = (addr>>8 & 0xFF); // 4
         *ptr++ = (addr>>0 & 0xFF); // 5
     } else {
         // 24C16 and less
+         msb_addr = (addr>>8 & 7) | eeprom_info->addr;      
         *ptr++ = (EEPROM_I2C_BUS_ADDRESS | msb_addr)<<1; // 3
         *ptr++ = (addr>>0 & 0xFF); // 4
     }
