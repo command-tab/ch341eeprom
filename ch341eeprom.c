@@ -54,27 +54,29 @@ int main(int argc, char **argv) {
 
     static char usage_msg[] = 
         "Usage:\n" \
-        " -h, --help              display this text\n" \
-        " -v, --verbose           verbose output\n" \
-        " -d, --debug             debug output\n" \
-        " -s, --size              size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}\n" \
-        " -e, --erase             erase EEPROM (fill with 0xff)\n" \
-        " -p, --speed             i2c speed (low|fast|high) if different than standard which is default\n" \
-        " -w, --write  <filename> write EEPROM with image from filename\n" \
-        " -r, --read   <filename> read EEPROM and save image to filename\n" \
-        " -V, --verify <filename> verify EEPROM contents against image in filename\n\n" \
+        " -h, --help                  display this text\n" \
+        " -v, --verbose               verbose output\n" \
+        " -d, --debug                 debug output\n" \
+        " -s, --size                  size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}\n" \
+        " -e, --erase                 erase EEPROM (fill with 0xff)\n" \
+        " -p, --speed                 i2c speed (low|fast|high) if different than standard which is default\n" \
+        " -c, --chip-select <value>   the part of the i2c address set by the chip select pins (default: 0)\n" \
+        " -w, --write  <filename>     write EEPROM with image from filename\n" \
+        " -r, --read   <filename>     read EEPROM and save image to filename\n" \
+        " -V, --verify <filename>     verify EEPROM contents against image in filename\n\n" \
         "Example: ch341eeprom -v -s 24c64 -w bootrom.bin\n";
 
     static struct option longopts[] = {
-        {"help",    no_argument,       0, 'h'},
-        {"verbose", no_argument,       0, 'v'},
-        {"debug",   no_argument,       0, 'd'},
-        {"erase",   no_argument,       0, 'e'},
-        {"size",    required_argument, 0, 's'},
-        {"speed",   required_argument, 0, 'p'},
-        {"read",    required_argument, 0, 'r'},
-        {"write",   required_argument, 0, 'w'},
-        {"verify",  required_argument, 0, 'V'},
+        {"help",        no_argument,       0, 'h'},
+        {"verbose",     no_argument,       0, 'v'},
+        {"debug",       no_argument,       0, 'd'},
+        {"erase",       no_argument,       0, 'e'},
+        {"size",        required_argument, 0, 's'},
+        {"speed",       required_argument, 0, 'p'},
+        {"chip-select", required_argument, 0, 'c'},
+        {"read",        required_argument, 0, 'r'},
+        {"write",       required_argument, 0, 'w'},
+        {"verify",      required_argument, 0, 'V'},
         {0, 0, 0, 0}
     };
 
@@ -82,7 +84,7 @@ int main(int argc, char **argv) {
 
     while (TRUE) {
         int32_t optidx = 0;
-        int8_t c = getopt_long(argc,argv,"hvdes:p:w:r:V:", longopts, &optidx);
+        int8_t c = getopt_long(argc,argv,"hvdes:p:c:w:r:V:", longopts, &optidx);
         if (c == -1)
             break;
 
@@ -96,6 +98,11 @@ int main(int argc, char **argv) {
             case 's': if((eepromsize = parseEEPsize(optarg, &eeprom_info)) > 0)
                         strncpy(eepromname, optarg, 10);
                       break;
+            case 'c':
+                     eeprom_info.addr = (uint8_t) atoi(optarg);
+                     if(eeprom_info.addr > 7) {
+                       fprintf(stderr, "chip select should probably be between 0 and 7 but continuing anyway");
+                     }
             case 'p': if(strstr(optarg, "low"))
                         speed = CH341_I2C_LOW_SPEED;
                       else if(strstr(optarg, "fast"))

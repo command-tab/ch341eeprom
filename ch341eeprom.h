@@ -345,7 +345,7 @@ struct EEPROM {
     uint32_t size;
     uint16_t page_size;
     uint8_t addr_size; // Length of addres in bytes
-    uint8_t i2c_addr_mask;
+    uint8_t addr; // value of the (up to) three EEPROM address select pins
 };
 
 const static struct EEPROM eepromlist[] = {

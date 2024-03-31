@@ -3,6 +3,8 @@ ch341eeprom
 
 A libusb based programming tool for 24Cxx serial EEPROMs using the WinChipHead CH341A IC
 
+This fork adds the ability to specify the value of the part of the I2C address set by the chip select pins using the `--chip-select` argument.
+
 ![WinChipHead CH341A based programmer](https://raw.github.com/commandtab/ch341eeprom/master/pics/programmer.jpg)
 
 **Requirements**
@@ -24,14 +26,16 @@ Using `ch341eeprom` is straightforward:
 
 ```
 Usage:
- -h, --help             display this text
- -v, --verbose          verbose output
- -d, --debug            debug output
- -s, --size             size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}
- -p, --speed            i2c speed (low|fast|high) if different than standard which is default
- -e, --erase            erase EEPROM (fill with 0xff)
- -w, --write <filename> write EEPROM with image from filename
- -r, --read  <filename> read EEPROM and save image to filename
+ -h, --help                  display this text
+ -v, --verbose               verbose output
+ -d, --debug                 debug output
+ -s, --size                  size of EEPROM {24c01|24c02|24c04|24c08|24c16|24c32|24c64|24c128|24c256|24c512|24c1024}
+ -e, --erase                 erase EEPROM (fill with 0xff)
+ -p, --speed                 i2c speed (low|fast|high) if different than standard which is default
+ -c, --chip-select <value>   the part of the i2c address set by the chip select pins (default: 0)
+ -w, --write  <filename>     write EEPROM with image from filename
+ -r, --read   <filename>     read EEPROM and save image to filename
+ -V, --verify <filename>     verify EEPROM contents against image in filename
 ```
 
 For example:
@@ -52,7 +56,7 @@ Closed USB device
 
 **Author**
 
-Originally written by [asbokid](http://sourceforge.net/projects/ch341eepromtool/) and released under the terms of the GNU GPL, version 3, or later. Modifications by [command-tab](https://github.com/command-tab) to make it work under OS X.
+Originally written by [asbokid](http://sourceforge.net/projects/ch341eepromtool/) and released under the terms of the GNU GPL, version 3, or later. Modifications by [command-tab](https://github.com/command-tab) to make it work under OS X. 
 
 **License**
 
