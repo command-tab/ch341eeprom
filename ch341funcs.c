@@ -354,10 +354,10 @@ int32_t ch341writeEEPROM(struct libusb_device_handle *devHandle, uint8_t *buffer
     while(bytes) {
         outptr = i2cCmdBuffer;
         if ((*eeprom_info).addr_size >= 2) {
-          *outptr++ = (uint8_t) (0xa0 | (eeprom_info->addr)<<1);  // EEPROM device address
+          *outptr++ = (uint8_t) (0xa0 | (((byteoffset >> 16) & 1) | eeprom_info->addr)<<1);  // EEPROM device address
             *outptr++ = (uint8_t) (byteoffset >> 8 & 0xff);     // MSB (big-endian) byte address
         } else {
-          *outptr++ = (uint8_t) (0xa0 | (eeprom_info->addr)<<1);  // EEPROM device address
+          *outptr++ = (uint8_t) (0xa0 | (((byteoffset >> 8) & 7) | eeprom_info->addr)<<1);  // EEPROM device address
         }
         *outptr++ = (uint8_t) (byteoffset & 0xff);          // LSB of 16-bit    byte address
 
