@@ -9,8 +9,8 @@ This fork adds the ability to specify the value of the part of the I2C address s
 
 **Requirements**
 
-* llvm and make (via Xcode or Xcode Command Line Tools)
-* libusb (perhaps via [Homebrew](http://mxcl.github.io/homebrew/): `brew install libusb`)
+* `clang`, `llvm`, and `make` (via Xcode or Xcode Command Line Tools)
+* `libusb` (perhaps via [Homebrew](http://mxcl.github.io/homebrew/): `brew install libusb`)
 
 **Compiling**
 
